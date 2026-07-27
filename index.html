@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>扫雷 · 微信小游戏</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>扫雷</h1>
+      <div class="stats">
+        <span id="mine-count">💣 0</span>
+        <span id="timer">⏱ 0</span>
+      </div>
+    </header>
+
+    <section class="difficulty">
+      <button data-diff="easy" class="active">初级 9×9</button>
+      <button data-diff="medium">中级 16×16</button>
+      <button data-diff="hard">高级 30×16</button>
+    </section>
+
+    <section id="board" class="board"></section>
+
+    <div class="actions">
+      <button id="restart">🔄 重开</button>
+      <button id="share-btn">📤 分享</button>
+    </div>
+
+    <section class="records">
+      <h2>最近战绩</h2>
+      <ul id="record-list"></ul>
+    </section>
+
+    <div id="share-overlay" class="share-overlay">
+      <img id="share-card-img" class="share-card-img" src="" alt="分享卡片">
+      <p class="share-hint">长按图片保存，发到微信群</p>
+      <button id="share-close" class="share-close">关闭</button>
+    </div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
