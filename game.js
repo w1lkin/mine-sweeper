@@ -281,6 +281,25 @@ if (typeof document !== 'undefined') {
   renderRecords();
 
   // ===== Task 5: 复用 share-card-generator 生成分享卡（离屏 canvas + 浮层） =====
+  // 根据难度与用时长短生成夸赞评语
+  const PRAISE_THRESHOLDS = {
+    easy:   [15, 30, 60],
+    medium: [60, 120, 240],
+    hard:   [120, 300, 600],
+  };
+  const PRAISE_TEXT = {
+    easy:   ['🚀 神级手速！这反应绝了', '💪 太强了，一扫即净', '👍 稳扎稳打，漂亮通关', '🌟 通关就是胜利，下次更快'],
+    medium: ['🚀 大师级操作，雷区如履平地', '💪 行云流水，佩服', '👍 稳稳通关，厉害', '🌟 成功扫清，继续加油'],
+    hard:   ['🚀 人形雷达！99 雷全拿下', '💪 硬核通关，强到离谱', '👍 临危不乱，漂亮', '🌟 极限挑战达成，赞'],
+  };
+  function praise(diff, time) {
+    const t = PRAISE_THRESHOLDS[diff] || PRAISE_THRESHOLDS.easy;
+    const p = PRAISE_TEXT[diff] || PRAISE_TEXT.easy;
+    if (time < t[0]) return p[0];
+    if (time < t[1]) return p[1];
+    if (time < t[2]) return p[2];
+    return p[3];
+  }
   function generateShareCardShare(diff, time, state) {
     const canvas = document.createElement('canvas');
     canvas.width = 1200; canvas.height = 1600;
@@ -307,6 +326,9 @@ if (typeof document !== 'undefined') {
     rr(90, 240, W - 180, H - 600, 56); ctx.fill();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
     const result = state === 'win' ? '🎉 通关' : state === 'lose' ? '💥 失败' : '进行中';
+    const praiseText = state === 'win' ? praise(diff, time)
+      : state === 'lose' ? '再接再厉，下次一定通关'
+      : '正在进行，加油！';
     ctx.fillStyle = '#81C784'; ctx.font = "bold 88px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
     ctx.textAlign = 'center'; ctx.fillText('扫雷', W / 2, 410);
     ctx.font = '90px sans-serif'; ctx.fillText('💣 🚩 💡', W / 2, 560);
@@ -314,7 +336,7 @@ if (typeof document !== 'undefined') {
     ctx.fillText(`${DIFF_LABEL[diff]} · 用时 ${time}s · ${result}`, W / 2, 680);
     ctx.strokeStyle = '#A5D6A7'; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
     ctx.beginPath(); ctx.moveTo(190, 760); ctx.lineTo(W - 190, 760); ctx.stroke(); ctx.setLineDash([]);
-    const features = ['🎯 难度：' + DIFF_LABEL[diff], '⏱ 用时：' + time + ' 秒', '🏆 状态：' + result];
+    const features = ['🎯 难度：' + DIFF_LABEL[diff], '⏱ 用时：' + time + ' 秒', '💬 ' + praiseText];
     ctx.fillStyle = '#777'; ctx.font = "40px -apple-system,'PingFang SC',sans-serif";
     features.forEach((f, i) => ctx.fillText(f, W / 2, 860 + i * 96));
     const qrImg = new Image(); qrImg.crossOrigin = 'anonymous';
