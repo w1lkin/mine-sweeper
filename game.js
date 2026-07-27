@@ -139,7 +139,7 @@ if (typeof document !== 'undefined') {
 
   let board = null;
   let currentDiff = 'easy';
-  let timer = 0, timerId = null, started = false, finished = false;
+  let timer = 0, timerId = null, started = false, finished = false, lastWin = null;
 
   const $board = document.getElementById('board');
   const $mineCount = document.getElementById('mine-count');
@@ -185,7 +185,7 @@ if (typeof document !== 'undefined') {
   }
 
   function endGame(win) {
-    finished = true; stopTimer();
+    finished = true; lastWin = win ? 'win' : 'lose'; stopTimer();
     if (!win) {
       board.cells.forEach(c => { if (c.mine) c.revealed = true; });
       render();
@@ -198,7 +198,15 @@ if (typeof document !== 'undefined') {
       time: timer, cellsLeft: left,
     });
     renderRecords();
-    setTimeout(() => alert(win ? `🎉 通关！用时 ${timer} 秒` : '💥 踩雷了'), 50);
+    if (win) {
+      // 通关后自动弹出分享卡片
+      setTimeout(() => {
+        if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, 'win');
+        else alert(`🎉 通关！用时 ${timer} 秒`);
+      }, 300);
+    } else {
+      setTimeout(() => alert('💥 踩雷了'), 50);
+    }
   }
 
   function onCellClick(i) {
@@ -259,7 +267,7 @@ if (typeof document !== 'undefined') {
 
   // 分享按钮：调用 share-card-generator 注入的函数（Task 5 定义）
   document.getElementById('share-btn').addEventListener('click', () => {
-    if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, finished);
+    if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, lastWin || 'playing');
     else alert('分享功能准备中');
   });
   document.getElementById('share-close').addEventListener('click', () =>
@@ -273,7 +281,7 @@ if (typeof document !== 'undefined') {
   renderRecords();
 
   // ===== Task 5: 复用 share-card-generator 生成分享卡（离屏 canvas + 浮层） =====
-  function generateShareCardShare(diff, time, finishedState) {
+  function generateShareCardShare(diff, time, state) {
     const canvas = document.createElement('canvas');
     canvas.width = 1200; canvas.height = 1600;
     const ctx = canvas.getContext('2d');
@@ -298,7 +306,7 @@ if (typeof document !== 'undefined') {
     }
     rr(90, 240, W - 180, H - 600, 56); ctx.fill();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    const result = finishedState ? '已结束' : '进行中';
+    const result = state === 'win' ? '🎉 通关' : state === 'lose' ? '💥 失败' : '进行中';
     ctx.fillStyle = '#81C784'; ctx.font = "bold 88px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
     ctx.textAlign = 'center'; ctx.fillText('扫雷', W / 2, 410);
     ctx.font = '90px sans-serif'; ctx.fillText('💣 🚩 💡', W / 2, 560);
