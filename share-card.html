@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>扫雷 · 分享卡片</title>
+<style>
+  body { font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; text-align:center; padding:40px 16px; background:#f5f5f5; }
+  canvas { border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,.12); max-width:90vw; }
+  button { margin-top:20px; padding:14px 40px; font-size:17px; background:#81C784; color:#fff; border:none; border-radius:14px; cursor:pointer; font-weight:600; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  p { color:#888; margin-top:12px; font-size:14px; }
+</style>
+</head>
+<body>
+<h2>扫雷 · 我的战绩</h2>
+<canvas id="c"></canvas>
+<p>点击下载 PNG，上传到托管平台作为 og:image</p>
+<button id="dl" onclick="downloadPNG()" disabled>加载中…</button>
+<script>
+// 配置：可替换为本局实际成绩
+const CONFIG = {
+  url: location.href,
+  title: "扫雷",
+  subtitle: "初级 · 用时 42 秒 · 通关",
+  features: ["🎯 难度：初级 9×9", "⏱ 用时：42 秒", "🏆 结果：通关"],
+  primaryColor: "#81C784", primaryLight: "#A5D6A7",
+};
+const W = 1200, H = 1600;
+const canvas = document.getElementById("c");
+canvas.width = W; canvas.height = H;
+const ctx = canvas.getContext("2d");
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r); ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r); ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r); ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r); ctx.closePath();
+}
+function draw(qr) {
+  const c = CONFIG;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#E8F5E9"); g.addColorStop(0.4, "#FFF9C4"); g.addColorStop(1, "#FFFDE7");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.globalAlpha = 0.12;
+  [
+    { x: 160, y: 360, r: 200, f: c.primaryColor },
+    { x: 960, y: 280, r: 140, f: c.primaryLight },
+    { x: 1040, y: 1120, r: 260, f: "#FFE082" },
+    { x: 200, y: 1240, r: 120, f: c.primaryColor },
+    { x: 600, y: 200, r: 90, f: c.primaryLight },
+  ].forEach(d => { ctx.fillStyle = d.f; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "#FFF"; ctx.shadowColor = "rgba(0,0,0,.08)"; ctx.shadowBlur = 80; ctx.shadowOffsetY = 12;
+  rr(90, 240, W - 180, H - 600, 56); ctx.fill();
+  ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.fillStyle = c.primaryColor;
+  ctx.font = "bold 88px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(c.title, W / 2, 410);
+  ctx.font = "90px sans-serif"; ctx.fillText("💣 🚩 💡", W / 2, 560);
+  ctx.fillStyle = "#999"; ctx.font = "44px -apple-system,'PingFang SC',sans-serif";
+  ctx.fillText(c.subtitle, W / 2, 680);
+  ctx.strokeStyle = c.primaryLight; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
+  ctx.beginPath(); ctx.moveTo(190, 760); ctx.lineTo(W - 190, 760); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = "#777"; ctx.font = "40px -apple-system,'PingFang SC',sans-serif";
+  c.features.forEach((f, i) => ctx.fillText(f, W / 2, 860 + i * 96));
+  const qs = 280, qx = (W - qs) / 2, qy = H - 400;
+  ctx.fillStyle = "#FFF"; rr(qx - 32, qy - 32, qs + 64, qs + 64, 40); ctx.fill();
+  if (qr) ctx.drawImage(qr, qx, qy, qs, qs);
+  ctx.fillStyle = "#AAA"; ctx.font = "28px -apple-system,'PingFang SC',sans-serif";
+  ctx.fillText("扫码或长按识别 · 和朋友一起玩", W / 2, H - 48);
+  document.getElementById("dl").disabled = false;
+  document.getElementById("dl").textContent = "下载 PNG";
+}
+const qr = new Image();
+qr.crossOrigin = "anonymous";
+qr.onload = () => draw(qr);
+qr.onerror = () => draw(null);
+qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + encodeURIComponent(CONFIG.url) + "&margin=8";
+function downloadPNG() {
+  const a = document.createElement("a");
+  a.download = "share-card.png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+}
+</script>
+</body>
+</html>
