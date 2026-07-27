@@ -205,7 +205,11 @@ if (typeof document !== 'undefined') {
         else alert(`🎉 通关！用时 ${timer} 秒`);
       }, 300);
     } else {
-      setTimeout(() => alert('💥 踩雷了'), 50);
+      // 踩雷也弹出分享卡片
+      setTimeout(() => {
+        if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, 'lose');
+        else alert('💥 踩雷了');
+      }, 300);
     }
   }
 
