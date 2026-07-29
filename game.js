@@ -345,6 +345,14 @@ if (typeof document !== 'undefined') {
     if (autoFlagOn && board) { autoFlag(board); render(); }
   });
 
+  function setImmerse(on) {
+    document.body.classList.toggle('immersive', on);
+    $immerseBtn.textContent = on ? '😎 退出' : '🙈 沉浸';
+    try { localStorage.setItem('minesweeper_immersive', on ? '1' : '0'); } catch (e) {}
+  }
+  $immerseBtn.addEventListener('click', () => setImmerse(!document.body.classList.contains('immersive')));
+  if (localStorage.getItem('minesweeper_immersive') === '1') setImmerse(true);
+
   newGame('easy');
   renderRecords();
 
