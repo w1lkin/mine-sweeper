@@ -255,7 +255,7 @@ if (typeof document !== 'undefined') {
   }
 
   function onCellClick(i) {
-    if (finished) return;
+    if (finished || paused) return;
     const r = Math.floor(i / board.cols), c = i % board.cols;
     const cell = board.cells[i];
     if (cell.flagged) return;
@@ -268,7 +268,7 @@ if (typeof document !== 'undefined') {
   }
 
   function onCellLongPress(i) {
-    if (finished) return;
+    if (finished || paused) return;
     const r = Math.floor(i / board.cols), c = i % board.cols;
     const cell = board.cells[i];
     if (cell.revealed) return;
