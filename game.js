@@ -83,6 +83,26 @@ function toggleFlag(board, r, c) {
   cell.flagged = !cell.flagged;
 }
 
+function autoFlag(board) {
+  for (let r = 0; r < board.rows; r++) {
+    for (let c = 0; c < board.cols; c++) {
+      const cell = board.cells[idx(board, r, c)];
+      if (!cell.revealed || cell.mine || cell.adj <= 0) continue;
+      let flagged = 0;
+      const hidden = [];
+      forEachNeighbor(board, r, c, (nr, nc) => {
+        const n = board.cells[idx(board, nr, nc)];
+        if (n.flagged) flagged++;
+        else if (!n.revealed) hidden.push(n);
+      });
+      // 确定性推导：已标 + 未翻 数恰等于该格数字 => 所有未翻邻格必为雷
+      if (hidden.length > 0 && flagged + hidden.length === cell.adj) {
+        hidden.forEach(n => { n.flagged = true; });
+      }
+    }
+  }
+}
+
 function remainingMines(board) {
   const flags = board.cells.filter(c => c.flagged).length;
   return board.mineCount - flags;
@@ -122,7 +142,7 @@ function saveRecord(record) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     initBoard, placeMines, forEachNeighbor, idx,
-    reveal, toggleFlag, remainingMines, isWin,
+    reveal, toggleFlag, remainingMines, isWin, autoFlag,
     loadRecords, saveRecord, MAX_RECORDS, RECORDS_KEY,
   };
 }
