@@ -291,11 +291,13 @@ if (typeof document !== 'undefined') {
     const t = e.target.closest('.cell'); if (!t) return;
     if (longPressed) { longPressed = false; return; }
     onCellClick(+t.dataset.i);
+    e.stopPropagation(); // render() 会重建 DOM，阻断冒泡避免误触 document 暂停逻辑
   });
   $board.addEventListener('contextmenu', e => {
     e.preventDefault();
     const t = e.target.closest('.cell'); if (!t) return;
     onCellLongPress(+t.dataset.i);
+    e.stopPropagation();
   });
 
   function renderRecords() {
