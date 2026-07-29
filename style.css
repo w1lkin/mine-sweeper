@@ -10,7 +10,7 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   border-radius: 10px; font-size: 13px; color: #333; cursor: pointer; }
 .difficulty button.active { background: #4472c4; color: #fff; border-color: #4472c4; }
 .board { display: grid; gap: 1px; background: #d0d0d0; padding: 1px; border: 1px solid #d0d0d0;
-  border-radius: 4px; overflow-x: auto; overflow-y: auto; touch-action: manipulation;
+  border-radius: 4px; overflow-x: scroll; overflow-y: auto; touch-action: manipulation;
   -webkit-user-select: none; user-select: none;
   scrollbar-width: thin; scrollbar-color: #b0b0b0 #ececec; }
 .cell { aspect-ratio: 1 / 1; min-width: 22px; display: flex; align-items: center;
@@ -48,9 +48,9 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   border-radius: 10px; padding: 10px 4px; cursor: pointer; }
 .controls .toggle input { width: 16px; height: 16px; }
 .board-wrap { position: relative; }
-.pause-overlay { display: none; position: absolute; inset: 0; z-index: 50;
+.pause-overlay { display: none; position: fixed; inset: 0; z-index: 150;
   flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  background: rgba(240,240,240,0.96); color: #555; border-radius: 8px;
+  background: rgba(243,243,243,0.97); color: #555; border-radius: 0;
   cursor: pointer; user-select: none; -webkit-user-select: none; }
 .board-wrap.paused .pause-overlay { display: flex; }
 .pause-overlay span { font-size: 22px; font-weight: 700; }
