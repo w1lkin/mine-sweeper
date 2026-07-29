@@ -376,19 +376,19 @@ if (typeof document !== 'undefined') {
     if (time < t[2]) return p[2];
     return p[3];
   }
-  function generateShareCardShare(diff, time, state) {
+  function generateShareCard(diff, time, state) {
     const canvas = document.createElement('canvas');
     canvas.width = 1200; canvas.height = 1600;
     const ctx = canvas.getContext('2d');
     const W = 1200, H = 1600;
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#E8F5E9'); g.addColorStop(.4, '#FFF9C4'); g.addColorStop(1, '#FFFDE7');
+    g.addColorStop(0, '#F3F3F3'); g.addColorStop(1, '#E8E8E8');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = .12;
+    ctx.globalAlpha = .14;
     [
-      { x: 160, y: 360, r: 200, f: '#81C784' }, { x: 960, y: 280, r: 140, f: '#A5D6A7' },
-      { x: 1040, y: 1120, r: 260, f: '#FFE082' }, { x: 200, y: 1240, r: 120, f: '#81C784' },
-      { x: 600, y: 200, r: 90, f: '#A5D6A7' },
+      { x: 160, y: 360, r: 200, f: '#4472C4' }, { x: 960, y: 280, r: 140, f: '#9DC3E6' },
+      { x: 1040, y: 1120, r: 260, f: '#B4C7E7' }, { x: 200, y: 1240, r: 120, f: '#4472C4' },
+      { x: 600, y: 200, r: 90, f: '#9DC3E6' },
     ].forEach(d => { ctx.fillStyle = d.f; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#FFF'; ctx.shadowColor = 'rgba(0,0,0,.08)'; ctx.shadowBlur = 80; ctx.shadowOffsetY = 12;
@@ -405,15 +405,15 @@ if (typeof document !== 'undefined') {
     const praiseText = state === 'win' ? praise(diff, time)
       : state === 'lose' ? '再接再厉，下次一定通关'
       : '正在进行，加油！';
-    ctx.fillStyle = '#81C784'; ctx.font = "bold 88px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillStyle = '#4472C4'; ctx.font = "bold 88px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
     ctx.textAlign = 'center'; ctx.fillText('扫雷', W / 2, 410);
     ctx.font = '90px sans-serif'; ctx.fillText('💣 🚩 💡', W / 2, 560);
-    ctx.fillStyle = '#999'; ctx.font = "44px -apple-system,'PingFang SC',sans-serif";
+    ctx.fillStyle = '#555'; ctx.font = "44px -apple-system,'PingFang SC',sans-serif";
     ctx.fillText(`${DIFF_LABEL[diff]} · 用时 ${time}s · ${result}`, W / 2, 680);
-    ctx.strokeStyle = '#A5D6A7'; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
+    ctx.strokeStyle = '#C9D3E5'; ctx.lineWidth = 3; ctx.setLineDash([16, 12]);
     ctx.beginPath(); ctx.moveTo(190, 760); ctx.lineTo(W - 190, 760); ctx.stroke(); ctx.setLineDash([]);
     const features = ['🎯 难度：' + DIFF_LABEL[diff], '⏱ 用时：' + time + ' 秒', '💬 ' + praiseText];
-    ctx.fillStyle = '#777'; ctx.font = "40px -apple-system,'PingFang SC',sans-serif";
+    ctx.fillStyle = '#333'; ctx.font = "40px -apple-system,'PingFang SC',sans-serif";
     features.forEach((f, i) => ctx.fillText(f, W / 2, 860 + i * 96));
     const qrImg = new Image(); qrImg.crossOrigin = 'anonymous';
     qrImg.onload = () => {
@@ -430,5 +430,5 @@ if (typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
     }
   }
-  window.generateShareCard = generateShareCardShare;
+  window.generateShareCard = generateShareCard;
 }
