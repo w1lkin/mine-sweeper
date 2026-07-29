@@ -59,3 +59,10 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .board::-webkit-scrollbar-track { background: #ececec; border-radius: 6px; }
 .board::-webkit-scrollbar-thumb { background: #b0b0b0; border-radius: 6px; }
 .board::-webkit-scrollbar-thumb:hover { background: #909090; }
+.immersive .difficulty,
+.immersive .actions,
+.immersive .records,
+.immersive .topbar h1,
+.immersive .controls .toggle,
+.immersive #pause-btn { display: none; }
+/* 保留 .topbar 状态栏(💣⏱) 与 .controls 中的退出按钮 */
