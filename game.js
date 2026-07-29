@@ -174,11 +174,24 @@ if (typeof document !== 'undefined') {
   const $immerseBtn = document.getElementById('immerse-btn');
 
   function startTimer() {
-    if (started) return;
+    if (timerId) return;
     started = true;
     timerId = setInterval(() => { timer++; $timer.textContent = '⏱ ' + timer; }, 1000);
   }
-  function stopTimer() { if (timerId) clearInterval(timerId); }
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+
+  function pauseGame() {
+    if (finished || paused) return;
+    paused = true;
+    stopTimer();
+    if ($boardWrap) $boardWrap.classList.add('paused');
+  }
+  function resumeGame() {
+    if (!paused) return;
+    paused = false;
+    if ($boardWrap) $boardWrap.classList.remove('paused');
+    if (started && !finished) startTimer(); // 继续计时
+  }
 
   function render() {
     $board.style.gridTemplateColumns = `repeat(${board.cols}, 1fr)`;
@@ -204,6 +217,8 @@ if (typeof document !== 'undefined') {
     const d = DIFFS[diff];
     board = initBoard(d.rows, d.cols, d.mines);
     timer = 0; started = false; finished = false; stopTimer();
+    paused = false;
+    if ($boardWrap) $boardWrap.classList.remove('paused');
     $timer.textContent = '⏱ 0';
     document.querySelectorAll('.difficulty button').forEach(b =>
       b.classList.toggle('active', b.dataset.diff === diff));
@@ -308,6 +323,20 @@ if (typeof document !== 'undefined') {
   document.querySelectorAll('.difficulty button').forEach(b =>
     b.addEventListener('click', () => newGame(b.dataset.diff)));
   document.getElementById('restart').addEventListener('click', () => newGame(currentDiff));
+
+  $pauseBtn.addEventListener('click', () => { if (paused) resumeGame(); else pauseGame(); });
+
+  document.addEventListener('click', (e) => {
+    if (finished) return;
+    const onBoard = e.target.closest('.board-wrap');
+    if (paused) {
+      if (onBoard) resumeGame(); // 单击牌面（含遮罩）取消暂停
+      return;
+    }
+    if (onBoard) return;                 // 正常棋盘点击由 board 处理器处理
+    if (e.target.closest('button, .toggle, .share-overlay')) return; // 控件放行，不暂停
+    pauseGame();                         // 点空白区 => 暂停
+  });
 
   $autoFlagToggle.checked = autoFlagOn;
   $autoFlagToggle.addEventListener('change', () => {
