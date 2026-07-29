@@ -28,7 +28,16 @@
       <button data-diff="hard">高级 30×16</button>
     </section>
 
-    <section id="board" class="board"></section>
+    <div class="controls">
+      <label class="toggle"><input type="checkbox" id="autoflag-toggle"> <span>自动标雷</span></label>
+      <button id="pause-btn" type="button">⏸ 暂停</button>
+      <button id="immerse-btn" type="button">🙈 沉浸</button>
+    </div>
+
+    <div class="board-wrap">
+      <section id="board" class="board"></section>
+      <div id="pause-overlay" class="pause-overlay"><span>已暂停</span><small>点击棋盘继续</small></div>
+    </div>
 
     <div class="actions">
       <button id="restart">🔄 重开</button>

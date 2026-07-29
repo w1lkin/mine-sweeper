@@ -160,12 +160,18 @@ if (typeof document !== 'undefined') {
   let board = null;
   let currentDiff = 'easy';
   let timer = 0, timerId = null, started = false, finished = false, lastWin = null;
+  let autoFlagOn = (localStorage.getItem('minesweeper_autoflag') !== 'false'); // 默认开
+  let paused = false;
 
   const $board = document.getElementById('board');
   const $mineCount = document.getElementById('mine-count');
   const $timer = document.getElementById('timer');
   const $recordList = document.getElementById('record-list');
   const $overlay = document.getElementById('share-overlay');
+  const $boardWrap = document.querySelector('.board-wrap');
+  const $autoFlagToggle = document.getElementById('autoflag-toggle');
+  const $pauseBtn = document.getElementById('pause-btn');
+  const $immerseBtn = document.getElementById('immerse-btn');
 
   function startTimer() {
     if (started) return;
@@ -241,6 +247,7 @@ if (typeof document !== 'undefined') {
     startTimer();
     const res = reveal(board, r, c);
     if (res.hitMine) { render(); endGame(false); return; }
+    if (autoFlagOn) autoFlag(board);
     render();
     if (isWin(board)) endGame(true);
   }
@@ -251,6 +258,7 @@ if (typeof document !== 'undefined') {
     const cell = board.cells[i];
     if (cell.revealed) return;
     toggleFlag(board, r, c);
+    if (autoFlagOn) autoFlag(board);
     render();
   }
 
@@ -300,6 +308,13 @@ if (typeof document !== 'undefined') {
   document.querySelectorAll('.difficulty button').forEach(b =>
     b.addEventListener('click', () => newGame(b.dataset.diff)));
   document.getElementById('restart').addEventListener('click', () => newGame(currentDiff));
+
+  $autoFlagToggle.checked = autoFlagOn;
+  $autoFlagToggle.addEventListener('change', () => {
+    autoFlagOn = $autoFlagToggle.checked;
+    try { localStorage.setItem('minesweeper_autoflag', autoFlagOn ? '1' : 'false'); } catch (e) {}
+    if (autoFlagOn && board) { autoFlag(board); render(); }
+  });
 
   newGame('easy');
   renderRecords();

@@ -38,3 +38,10 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .share-hint { color: #ccc; font-size: 14px; margin-top: 16px; text-align: center; opacity: .85; }
 .share-close { color: #ccc; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
   padding: 10px 32px; border-radius: 24px; font-size: 15px; cursor: pointer; margin-top: 16px; }
+.controls { display: flex; gap: 8px; margin: 8px 0; align-items: center; }
+.controls button { flex: 1; padding: 10px 4px; border: 1.5px solid #c0c0c0; background: #fff;
+  border-radius: 10px; font-size: 14px; color: #333; cursor: pointer; }
+.controls .toggle { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 14px; color: #333; border: 1.5px solid #c0c0c0; background: #fff;
+  border-radius: 10px; padding: 10px 4px; cursor: pointer; }
+.controls .toggle input { width: 16px; height: 16px; }
