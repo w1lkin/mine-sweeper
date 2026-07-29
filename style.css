@@ -1,20 +1,22 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
 body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: #e8f5e9; color: #2e7d32; }
+  background: #f3f3f3; color: #222; }
 .app { max-width: 480px; margin: 0 auto; padding: 12px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; }
 .topbar h1 { font-size: 22px; margin: 0; }
 .stats span { font-size: 16px; margin-left: 12px; font-variant-numeric: tabular-nums; }
 .difficulty { display: flex; gap: 8px; margin: 12px 0; }
-.difficulty button { flex: 1; padding: 8px 4px; border: 1.5px solid #a5d6a7; background: #fff;
-  border-radius: 10px; font-size: 13px; color: #2e7d32; cursor: pointer; }
-.difficulty button.active { background: #81c784; color: #fff; border-color: #81c784; }
-.board { display: grid; gap: 2px; background: #c8e6c9; padding: 4px; border-radius: 8px;
-  overflow-x: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.difficulty button { flex: 1; padding: 8px 4px; border: 1.5px solid #c0c0c0; background: #fff;
+  border-radius: 10px; font-size: 13px; color: #333; cursor: pointer; }
+.difficulty button.active { background: #4472c4; color: #fff; border-color: #4472c4; }
+.board { display: grid; gap: 1px; background: #d0d0d0; padding: 1px; border: 1px solid #d0d0d0;
+  border-radius: 4px; overflow-x: auto; overflow-y: auto; touch-action: manipulation;
+  -webkit-user-select: none; user-select: none;
+  scrollbar-width: thin; scrollbar-color: #b0b0b0 #ececec; }
 .cell { aspect-ratio: 1 / 1; min-width: 22px; display: flex; align-items: center;
-  justify-content: center; background: #a5d6a7; border-radius: 3px; font-weight: 700;
+  justify-content: center; background: #fff; border-radius: 0; font-weight: 700;
   font-size: 14px; user-select: none; cursor: pointer; }
-.cell.revealed { background: #f1f8e9; cursor: default; }
+.cell.revealed { background: #fafafa; cursor: default; }
 .cell.flagged::after { content: "🚩"; }
 .cell.mine { background: #ef9a9a; }
 .cell.n1 { color: #1976d2; } .cell.n2 { color: #388e3c; } .cell.n3 { color: #d32f2f; }
@@ -23,12 +25,12 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .actions { display: flex; gap: 8px; margin: 12px 0; }
 .actions button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 15px;
   font-weight: 600; cursor: pointer; }
-#restart { background: #c8e6c9; color: #2e7d32; }
-#share-btn { background: #81c784; color: #fff; }
+#restart { background: #e0e0e0; color: #333; }
+#share-btn { background: #4472c4; color: #fff; }
 .records h2 { font-size: 16px; }
 .records ul { list-style: none; padding: 0; margin: 0; }
 .records li { display: flex; justify-content: space-between; padding: 8px 10px; background: #fff;
-  border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+  border: 1px solid #e3e3e3; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
 .records li .win { color: #2e7d32; } .records li .lose { color: #d32f2f; }
 .share-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
   z-index: 200; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
@@ -53,3 +55,7 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .board-wrap.paused .pause-overlay { display: flex; }
 .pause-overlay span { font-size: 22px; font-weight: 700; }
 .pause-overlay small { font-size: 13px; color: #999; }
+.board::-webkit-scrollbar { width: 10px; height: 10px; }
+.board::-webkit-scrollbar-track { background: #ececec; border-radius: 6px; }
+.board::-webkit-scrollbar-thumb { background: #b0b0b0; border-radius: 6px; }
+.board::-webkit-scrollbar-thumb:hover { background: #909090; }
