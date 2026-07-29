@@ -36,7 +36,22 @@
 
     <div class="board-wrap">
       <section id="board" class="board"></section>
-      <div id="pause-overlay" class="pause-overlay"><span>已暂停</span><small>点击任意处继续</small></div>
+      <div id="pause-overlay" class="pause-overlay">
+        <div class="fake-excel">
+          <div class="fx-title">表格文档 · Q3预算执行表.xlsx</div>
+          <div class="fx-ribbon"><span>文件</span><span>开始</span><span>插入</span><span>页面布局</span><span>公式</span><span>数据</span><span>审阅</span><span>视图</span></div>
+          <div class="fx-toolbar">
+            <div class="fx-grp"><i></i><small>粘贴</small></div>
+            <div class="fx-grp"><i></i><small>字体</small></div>
+            <div class="fx-grp"><i></i><small>对齐</small></div>
+            <div class="fx-grp"><i></i><small>数字</small></div>
+            <div class="fx-grp"><i></i><small>排序</small></div>
+            <div class="fx-grp"><i></i><small>图表</small></div>
+          </div>
+          <div class="fx-grid" id="fx-grid"></div>
+          <div class="fx-status"><span>就绪</span><span id="fx-zoom">100%</span></div>
+        </div>
+      </div>
     </div>
 
     <div class="actions">

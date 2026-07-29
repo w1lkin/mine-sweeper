@@ -184,7 +184,39 @@ if (typeof document !== 'undefined') {
     if (finished || paused) return;
     paused = true;
     stopTimer();
+    buildFakeSheet();
     if ($boardWrap) $boardWrap.classList.add('paused');
+  }
+
+  // 暂停时生成一张伪装的预算表，避免摸鱼露馅
+  function buildFakeSheet() {
+    const grid = document.getElementById('fx-grid');
+    if (!grid) return;
+    const cols = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const fields = ['', '项目', '负责人', '预算(万)', '已支出', '进度', '状态', '备注'];
+    const owners = ['张伟', '李娜', '王芳', '刘洋', '陈静', '赵磊'];
+    const items = ['市场推广', '研发投入', '设备采购', '差旅费', '外包服务', '培训', '运维', '咨询费'];
+    const states = [['进行中', '#b26a00'], ['已完成', '#2e7d32'], ['待启动', '#888']];
+    let html = '<div class="fx-row fx-coord">' +
+      cols.map(c => `<div class="fx-cell">${c}</div>`).join('') + '</div>';
+    html += '<div class="fx-row fx-head">' +
+      fields.map(f => `<div class="fx-cell">${f}</div>`).join('') + '</div>';
+    for (let i = 0; i < 14; i++) {
+      const budget = Math.floor(Math.random() * 90) + 10;
+      const spent = Math.floor(budget * (Math.random() * 0.9 + 0.05));
+      const prog = Math.floor(spent / budget * 100);
+      const st = states[Math.floor(Math.random() * states.length)];
+      const cells = [
+        i + 1,
+        items[Math.floor(Math.random() * items.length)],
+        owners[Math.floor(Math.random() * owners.length)],
+        budget, spent, prog + '%',
+        `<span style="color:${st[1]}">${st[0]}</span>`, '—',
+      ];
+      html += '<div class="fx-row">' +
+        cells.map(c => `<div class="fx-cell">${c}</div>`).join('') + '</div>';
+    }
+    grid.innerHTML = html;
   }
   function resumeGame() {
     if (!paused) return;
@@ -349,7 +381,7 @@ if (typeof document !== 'undefined') {
 
   function setImmerse(on) {
     document.body.classList.toggle('immersive', on);
-    $immerseBtn.textContent = on ? '😎 退出' : '🙈 沉浸';
+    $immerseBtn.textContent = on ? '退出' : '🙈 沉浸';
     try { localStorage.setItem('minesweeper_immersive', on ? '1' : '0'); } catch (e) {}
   }
   $immerseBtn.addEventListener('click', () => setImmerse(!document.body.classList.contains('immersive')));
