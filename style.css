@@ -17,8 +17,8 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   justify-content: center; background: #ffffff; border-radius: 0; font-weight: 700;
   font-size: 14px; user-select: none; cursor: pointer;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08); }
-.cell.revealed { background: #ffffff; cursor: default;
-  box-shadow: inset 0 0 0 1.5px #70ad47; }
+.cell.revealed { background: #e7e6e6; cursor: default;
+  box-shadow: inset 0 0 0 1.5px #107c41; }
 .cell.flagged::after { content: "🚩"; }
 .cell.mine { background: #ef9a9a; }
 .cell.n1 { color: #1976d2; } .cell.n2 { color: #388e3c; } .cell.n3 { color: #d32f2f; }
