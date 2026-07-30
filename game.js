@@ -271,19 +271,18 @@ if (typeof document !== 'undefined') {
       time: timer, cellsLeft: left,
     });
     renderRecords();
-    if (win) {
-      // 通关后自动弹出分享卡片
-      setTimeout(() => {
-        if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, 'win');
-        else alert(`🎉 通关！用时 ${timer} 秒`);
-      }, 300);
-    } else {
-      // 踩雷也弹出分享卡片
-      setTimeout(() => {
-        if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, 'lose');
-        else alert('💥 踩雷了');
-      }, 300);
-    }
+    showResult(win);
+  }
+
+  // 结算浮层（纯 DOM，不依赖 canvas，iOS 微信也能可靠显示）
+  function showResult(win) {
+    const $ro = document.getElementById('result-overlay');
+    if (!$ro) return;
+    document.getElementById('result-emoji').textContent = win ? '🎉' : '💥';
+    document.getElementById('result-title').textContent = win ? '通关！' : '踩雷了';
+    document.getElementById('result-sub').textContent = `${DIFF_LABEL[currentDiff]} · 用时 ${timer} 秒`;
+    $ro.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
 
   function onCellClick(i) {
@@ -354,6 +353,17 @@ if (typeof document !== 'undefined') {
   document.getElementById('share-close').addEventListener('click', () =>
     $overlay.classList.remove('active'));
   $overlay.addEventListener('click', e => { if (e.target === $overlay) $overlay.classList.remove('active'); });
+  document.getElementById('result-again').addEventListener('click', () => {
+    document.getElementById('result-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+    newGame(currentDiff);
+  });
+  document.getElementById('result-share').addEventListener('click', () => {
+    document.getElementById('result-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+    if (typeof window.generateShareCard === 'function') window.generateShareCard(currentDiff, timer, lastWin || 'playing');
+    else alert('分享功能准备中');
+  });
   document.querySelectorAll('.difficulty button').forEach(b =>
     b.addEventListener('click', () => newGame(b.dataset.diff)));
   document.getElementById('restart').addEventListener('click', () => newGame(currentDiff));
@@ -459,7 +469,9 @@ if (typeof document !== 'undefined') {
     qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=' +
       encodeURIComponent(location.href) + '&margin=8';
     function show() {
-      document.getElementById('share-card-img').src = canvas.toDataURL('image/png');
+      const img = document.getElementById('share-card-img');
+      try { img.src = canvas.toDataURL('image/png'); img.style.display = ''; }
+      catch (e) { img.style.display = 'none'; } // iOS 跨域 QR 污染 canvas 时降级，浮层仍显示
       $overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
     }

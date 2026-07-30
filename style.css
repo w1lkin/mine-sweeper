@@ -14,9 +14,10 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   -webkit-user-select: none; user-select: none;
   scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: #b0b0b0 #ececec; }
 .cell { aspect-ratio: 1 / 1; min-width: 22px; display: flex; align-items: center;
-  justify-content: center; background: #fff; border-radius: 0; font-weight: 700;
-  font-size: 14px; user-select: none; cursor: pointer; }
-.cell.revealed { background: #fafafa; cursor: default; }
+  justify-content: center; background: #cfe0f3; border-radius: 0; font-weight: 700;
+  font-size: 14px; user-select: none; cursor: pointer;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08); }
+.cell.revealed { background: #ffffff; cursor: default; box-shadow: none; }
 .cell.flagged::after { content: "🚩"; }
 .cell.mine { background: #ef9a9a; }
 .cell.n1 { color: #1976d2; } .cell.n2 { color: #388e3c; } .cell.n3 { color: #d32f2f; }
@@ -84,3 +85,17 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .immersive .controls .toggle,
 .immersive #pause-btn { display: none; }
 /* 保留 .topbar 状态栏(💣⏱) 与 .controls 中的退出按钮 */
+
+.result-overlay { display: none; position: fixed; inset: 0; z-index: 180;
+  background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 24px; }
+.result-overlay.active { display: flex; }
+.result-card { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 320px;
+  text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+.result-emoji { font-size: 48px; line-height: 1; }
+.result-title { margin: 10px 0 4px; font-size: 24px; color: #222; }
+.result-sub { margin: 0 0 20px; color: #777; font-size: 15px; }
+.result-actions { display: flex; gap: 10px; }
+.result-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 15px;
+  font-weight: 600; cursor: pointer; }
+.result-btn.primary { background: #4472c4; color: #fff; }
+.result-btn:not(.primary) { background: #e0e0e0; color: #333; }

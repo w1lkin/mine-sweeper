@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>扫雷 · 微信小游戏</title>
-  <meta name="description" content="经典扫雷 HTML5 网页版，三档难度、最近战绩本地保存，支持分享卡片。">
-  <meta property="og:title" content="扫雷 · 微信小游戏">
+  <title>扫雷</title>
+  <meta name="description" content="经典扫雷，三档难度、最近战绩本地保存，支持分享卡片。">
+  <meta property="og:title" content="扫雷">
   <meta property="og:description" content="经典扫雷，三档难度，挑战你的最快通关纪录！">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://mine-sweeper-2f1.pages.dev/">
@@ -63,6 +63,18 @@
       <h2>最近战绩</h2>
       <ul id="record-list"></ul>
     </section>
+
+    <div id="result-overlay" class="result-overlay">
+      <div class="result-card">
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <h2 class="result-title" id="result-title">通关！</h2>
+        <p class="result-sub" id="result-sub">简单 · 用时 0 秒</p>
+        <div class="result-actions">
+          <button id="result-again" class="result-btn primary" type="button">再来一局</button>
+          <button id="result-share" class="result-btn" type="button">分享战绩</button>
+        </div>
+      </div>
+    </div>
 
     <div id="share-overlay" class="share-overlay">
       <img id="share-card-img" class="share-card-img" src="" alt="分享卡片">
