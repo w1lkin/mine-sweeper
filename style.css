@@ -72,19 +72,33 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .fx-row:nth-child(even) .fx-cell { background: #fafafa; }
 .fx-status { display: flex; justify-content: space-between; padding: 4px 12px;
   background: #f3f3f3; border-top: 1px solid #d0d0d0; font-size: 12px; color: #666; }
-.board::-webkit-scrollbar { -webkit-appearance: none; width: 11px; height: 11px; background: #ececec; }
-.board::-webkit-scrollbar-track { background: #ececec; }
-.board::-webkit-scrollbar-thumb { background: #b0b0b0; border: 2px solid #ececec; border-radius: 8px; }
-.board::-webkit-scrollbar-thumb:hover { background: #909090; }
-.board::-webkit-scrollbar-corner { background: #ececec; }
+.board::-webkit-scrollbar { -webkit-appearance: none; width: 0; height: 0; }
+.board::-webkit-scrollbar-track { background: transparent; }
+.board::-webkit-scrollbar-thumb { background: transparent; }
+.board::-webkit-scrollbar-corner { background: transparent; }
+.board { scrollbar-width: none; -ms-overflow-style: none; }
+.board-scrollbar { display: none; height: 6px; margin-top: 4px; background: #ececec;
+  border-radius: 3px; position: relative; }
+.board-scrollbar.show { display: block; }
+.bsb-thumb { position: absolute; top: 0; left: 0; height: 100%; min-width: 20px;
+  background: #b0b0b0; border-radius: 3px; cursor: grab; touch-action: none; }
+.bsb-thumb:active { cursor: grabbing; background: #909090; }
 .immersive .difficulty,
 .immersive .actions,
 .immersive .records,
 .immersive .topbar h1,
 .immersive .controls .toggle,
-.immersive #pause-btn { display: none; }
-/* 保留 .topbar 状态栏(💣⏱) 与 .controls 中的退出按钮 */
+.immersive #pause-btn, .immersive .controls { display: none; }
+/* 保留 .topbar 状态栏(💣⏱)；沉浸式退出改由右上角 #immerse-exit 负责 */
 
+/* 沉浸式退出：右上角极小的常驻按钮 */
+.immerse-exit { display: none; position: fixed; top: 8px; right: 8px; z-index: 160;
+  width: 28px; height: 28px; align-items: center; justify-content: center;
+  border: none; border-radius: 50%; background: rgba(0,0,0,0.35); color: #fff;
+  font-size: 15px; line-height: 1; cursor: pointer; opacity: .5; padding: 0; }
+.immerse-exit:active { opacity: .9; }
+.immersive #immerse-exit { display: flex; }
+.immersive .stats { padding-right: 36px; }
 .result-overlay { display: none; position: fixed; inset: 0; z-index: 180;
   background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 24px; }
 .result-overlay.active { display: flex; }

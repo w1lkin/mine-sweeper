@@ -172,6 +172,9 @@ if (typeof document !== 'undefined') {
   const $autoFlagToggle = document.getElementById('autoflag-toggle');
   const $pauseBtn = document.getElementById('pause-btn');
   const $immerseBtn = document.getElementById('immerse-btn');
+  const $immerseExit = document.getElementById('immerse-exit');
+  const $bsb = document.getElementById('board-scrollbar');
+  const $bsbThumb = document.getElementById('bsb-thumb');
 
   function startTimer() {
     if (timerId) return;
@@ -225,6 +228,49 @@ if (typeof document !== 'undefined') {
     if (started && !finished) startTimer(); // 继续计时
   }
 
+  // 失焦自动暂停：切到桌面/其他应用或切换标签页时，显示伪装表
+  window.addEventListener('blur', () => { if (started && !finished && !paused) pauseGame(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && started && !finished && !paused) pauseGame();
+  });
+
+  // 常驻自定义水平滚动条：仅在棋盘横向溢出时显示，始终可见，可拖拽
+  function updateScrollbar() {
+    if (!$board || !$bsb) return;
+    const overflow = $board.scrollWidth - $board.clientWidth;
+    if (overflow > 1) {
+      $bsb.classList.add('show');
+      const ratio = $board.clientWidth / $board.scrollWidth;
+      const thumbW = Math.max(24, $bsb.clientWidth * ratio);
+      $bsbThumb.style.width = thumbW + 'px';
+      const maxScroll = $board.scrollWidth - $board.clientWidth;
+      const maxThumb = $bsb.clientWidth - thumbW;
+      const x = maxScroll > 0 ? ($board.scrollLeft / maxScroll) * maxThumb : 0;
+      $bsbThumb.style.transform = 'translateX(' + x + 'px)';
+    } else {
+      $bsb.classList.remove('show');
+    }
+  }
+  $board.addEventListener('scroll', updateScrollbar);
+  window.addEventListener('resize', updateScrollbar);
+  let bsbDragging = false, bsbStartX = 0, bsbThumbStartX = 0;
+  $bsbThumb.addEventListener('pointerdown', e => {
+    bsbDragging = true; bsbStartX = e.clientX;
+    bsbThumbStartX = parseFloat(($bsbThumb.style.transform.match(/translateX\(([-\d.]+)px\)/) || [])[1] || 0);
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', e => {
+    if (!bsbDragging) return;
+    const thumbW = $bsbThumb.offsetWidth;
+    const maxThumb = $bsb.clientWidth - thumbW;
+    let x = bsbThumbStartX + (e.clientX - bsbStartX);
+    x = Math.max(0, Math.min(maxThumb, x));
+    $bsbThumb.style.transform = 'translateX(' + x + 'px)';
+    const maxScroll = $board.scrollWidth - $board.clientWidth;
+    $board.scrollLeft = maxScroll * (x / (maxThumb || 1));
+  });
+  window.addEventListener('pointerup', () => { bsbDragging = false; });
+
   function render() {
     $board.style.gridTemplateColumns = `repeat(${board.cols}, 1fr)`;
     $board.innerHTML = '';
@@ -242,6 +288,7 @@ if (typeof document !== 'undefined') {
       $board.appendChild(el);
     });
     $mineCount.textContent = '💣 ' + remainingMines(board);
+    updateScrollbar();
   }
 
   function newGame(diff) {
@@ -372,6 +419,7 @@ if (typeof document !== 'undefined') {
 
   document.addEventListener('click', (e) => {
     if (finished) return;
+    if (e.target.closest('.board-scrollbar')) return; // 滚动条交互不触发暂停/恢复
     const onBoard = e.target.closest('.board-wrap');
     if (paused) {
       if (onBoard) resumeGame(); // 单击牌面（含遮罩）取消暂停
@@ -395,6 +443,7 @@ if (typeof document !== 'undefined') {
     try { localStorage.setItem('minesweeper_immersive', on ? '1' : '0'); } catch (e) {}
   }
   $immerseBtn.addEventListener('click', () => setImmerse(!document.body.classList.contains('immersive')));
+  $immerseExit.addEventListener('click', () => setImmerse(false));
   if (localStorage.getItem('minesweeper_immersive') === '1') setImmerse(true);
 
   newGame('easy');
