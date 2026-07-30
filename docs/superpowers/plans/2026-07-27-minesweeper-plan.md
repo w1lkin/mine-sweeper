@@ -420,7 +420,7 @@ git commit -m "feat: localStorage recent-10 records with tests"
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>扫雷 · 微信小游戏</title>
+  <title>扫雷</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>

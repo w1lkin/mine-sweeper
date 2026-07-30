@@ -1,0 +1,15 @@
+Task 1: complete (12c05dc, tests 14/14 pass)
+Task 2: complete (3c8f7c9; 修正: 关闭态存 'false' 与读取判断一致)
+Task 3: complete (c98ed15; 补充: newGame 重置暂停态)
+Task 4: complete (38b5b6f)
+Task 5: complete (2e821e8; 修正: 隐藏整个 .toggle 而非仅 input)
+Final review: Approved; fix I3 committed (a737539); I4/M2/M3/M5 记为 follow-up
+Follow-up: share-card 配色已统一为浅灰底+蓝(#4472C4)强调; generateShareCardShare -> generateShareCard (导出名不变); 14/14 测试通过
+Bug fix: 点击格子误暂停已修复 (dea55cc)
+Tweak: 全屏暂停遮罩 + 滚动条常驻 (a060c28)
+Tweak: 暂停伪装 Excel (fb6ca64)
+Tweak: 滚动条常驻 (593b2a5)
+Fix: 格子对比 + 结算浮层 (a67f310)
+Tweak: 格子配色 (2e4383e)
+Tweak: Excel 选中格子样式 (33b9f5f)
+Tweak: 扁平浅灰填充 (4d9eeda)
