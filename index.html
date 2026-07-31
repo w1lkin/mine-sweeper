@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>扫雷</title>
-  <meta name="description" content="经典扫雷，三档难度、最近战绩本地保存，支持分享卡片。">
+  <meta name="api-base" content="https://api.w1lkin.site">
+  <script src="https://api.w1lkin.site/sdk.js"></script>
+  <meta name="description" content="经典扫雷，三档难度、最近战绩云端保存，支持分享卡片。">
   <meta property="og:title" content="扫雷">
   <meta property="og:description" content="经典扫雷，三档难度，挑战你的最快通关纪录！">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mine-sweeper-2f1.pages.dev/">
-  <meta property="og:image" content="https://mine-sweeper-2f1.pages.dev/share-card.png">
+  <meta property="og:url" content="https://mine-sweeper.w1lkin.site/">
+  <meta property="og:image" content="https://mine-sweeper.w1lkin.site/share-card.png">
   <link rel="stylesheet" href="style.css">
   <style>
     /* 社交平台接入样式 */
@@ -45,6 +47,8 @@
   </style>
 </head>
 <body>
+  <div id="gp-bar" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:6px 12px;background:rgba(20,24,40,.85)"></div>
+  <div id="gp-leaderboard" style="position:fixed;right:8px;bottom:8px;z-index:50;max-width:200px;padding:10px;background:rgba(20,24,40,.9);border-radius:12px"></div>
   <main class="app">
     <header class="topbar">
       <h1>扫雷</h1>
