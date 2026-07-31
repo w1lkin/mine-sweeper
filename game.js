@@ -537,48 +537,24 @@ if (typeof document !== 'undefined') {
       const GP = window.GamePlatform;
       const GAME_ID = 'mine-sweeper';
       if (!GP) return;
-      let gpTab = 'login';
       const DEFAULT_AV = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23cfd8dc'/%3E%3Ccircle cx='40' cy='30' r='15' fill='%23fff'/%3E%3Cpath d='M18 70 a22 22 0 0 1 44 0' fill='%23fff'/%3E%3C/svg%3E";
       const esc = s => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
       const fmtScore = s => (typeof s === 'number' && !Number.isNaN(s)) ? (Number.isInteger(s) ? String(s) : s.toFixed(1)) : s;
-      const ERR = { nickname_taken: '昵称已被占用', invalid_credentials: '昵称或密码错误', password_too_short: '密码至少6位', bad_type: '头像类型不支持', too_large: '头像超过2MB', missing_fields: '请填写完整' };
 
       function renderUser() {
         const el = document.getElementById('gp-user'); if (!el) return;
-        if (!GP.getToken()) { el.innerHTML = '<button class="gp-btn" onclick="gpOpenAuth()">登录/注册</button>'; return; }
-        GP.getUser().then(u => {
-          if (!u) { el.innerHTML = '<button class="gp-btn" onclick="gpOpenAuth()">登录/注册</button>'; return; }
-          el.innerHTML = '<img class="gp-ava" src="' + (u.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-nick">' + esc(u.nickname) + '</span><button class="gp-btn ghost" onclick="gpLogout()">退出</button>';
-        }).catch(() => { el.innerHTML = '<button class="gp-btn" onclick="gpOpenAuth()">登录/注册</button>'; });
-      }
-      window.gpOpenAuth = () => { const m = document.getElementById('gp-auth'); if (m) m.classList.remove('hidden'); };
-      window.gpCloseAuth = () => { const m = document.getElementById('gp-auth'); if (m) m.classList.add('hidden'); };
-      window.gpLogout = () => { GP.logout(); renderUser(); };
-      window.gpSwitch = t => {
-        gpTab = t;
-        document.querySelectorAll('#gp-auth .gp-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
-      };
-      window.gpSubmitAuth = async () => {
-        const nick = (document.getElementById('gp-nick').value || '').trim();
-        const pw = document.getElementById('gp-pw').value || '';
-        const file = document.getElementById('gp-ava').files[0];
-        const msg = document.getElementById('gp-msg'); msg.textContent = '';
-        if (!nick || !pw) { msg.textContent = '请填写昵称和密码'; return; }
-        if (gpTab === 'register' && pw.length < 6) { msg.textContent = '密码至少6位'; return; }
-        if (file) {
-          if (file.size > 2 * 1024 * 1024) { msg.textContent = '头像超过2MB'; return; }
-          if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) { msg.textContent = '头像类型不支持'; return; }
+        if (!GP.getToken()) {
+          el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>';
+          return;
         }
-        try {
-          let user;
-          if (gpTab === 'register') user = await GP.register(nick, pw);
-          else user = await GP.login(nick, pw);
-          if (gpTab === 'register' && file) {
-            try { const url = await GP.uploadAvatar(file); user = await GP.updateProfile({ avatar_url: url }); } catch (e) {}
-          }
-          renderUser(); window.gpCloseAuth(); GP.startHeartbeat(GAME_ID);
-        } catch (e) { msg.textContent = ERR[e.message] || ('出错了：' + e.message); }
-      };
+        GP.getUser().then(u => {
+          if (!u) { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; return; }
+          el.innerHTML = '<img class="gp-ava" src="' + (u.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-nick">' + esc(u.nickname) + '</span><button class="gp-btn ghost" onclick="gpLogout()">退出</button>';
+        }).catch(() => { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; });
+      }
+      // 登录收口到总入口：未登录跳转 / 退出后点「登录」跳回
+      window.gpGoLogin = () => GP.redirectToLogin();
+      window.gpLogout = () => { GP.logout(); renderUser(); };
       async function loadOnline() {
         const box = document.getElementById('gp-online'); if (!box) return;
         try {

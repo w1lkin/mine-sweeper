@@ -125,21 +125,6 @@
     </div>
   </main>
 
-  <div id="gp-auth" class="gp-modal hidden">
-    <div class="gp-sheet">
-      <div class="gp-tabs">
-        <button class="gp-tab active" data-tab="login" onclick="gpSwitch('login')">登录</button>
-        <button class="gp-tab" data-tab="register" onclick="gpSwitch('register')">注册</button>
-      </div>
-      <input id="gp-nick" type="text" placeholder="昵称" maxlength="20">
-      <input id="gp-pw" type="password" placeholder="密码（≥6位）">
-      <label class="gp-file">头像（选填，≤2MB，jpg/png/webp/gif）<input id="gp-ava" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label>
-      <div id="gp-msg" class="gp-msg"></div>
-      <button class="gp-btn" onclick="gpSubmitAuth()">登录</button>
-      <button class="gp-btn ghost" onclick="gpCloseAuth()">取消</button>
-    </div>
-  </div>
-
   <!-- 动态加载 SDK（?api= 可覆盖本地联调），加载完成再加载 game.js -->
   <script>
     window.__GP_API_BASE__ = new URLSearchParams(location.search).get('api') || 'https://api.w1lkin.site';
@@ -151,7 +136,13 @@
         g.src = 'game.js';
         document.body.appendChild(g);
       }
-      s.onload = loadGame;
+      s.onload = function () {
+        var GP = window.GamePlatform;
+        GP.init();
+        // 未登录统一跳转到总入口登录（带 redirect 回来带 token）
+        if (!GP.getToken()) { GP.redirectToLogin(); return; }
+        loadGame();
+      };
       s.onerror = loadGame; // SDK 不可用时游戏仍可玩（无社交功能）
       document.head.appendChild(s);
     })();
