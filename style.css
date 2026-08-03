@@ -27,11 +27,6 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   font-weight: 600; cursor: pointer; }
 #restart { background: #e0e0e0; color: #333; }
 #share-btn { background: #4472c4; color: #fff; }
-.records h2 { font-size: 16px; }
-.records ul { list-style: none; padding: 0; margin: 0; }
-.records li { display: flex; justify-content: space-between; padding: 8px 10px; background: #fff;
-  border: 1px solid #e3e3e3; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
-.records li .win { color: #2e7d32; } .records li .lose { color: #d32f2f; }
 .share-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
   z-index: 200; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
 .share-overlay.active { display: flex; }
@@ -85,7 +80,6 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .bsb-thumb:active { cursor: grabbing; background: #909090; }
 .immersive .difficulty,
 .immersive .actions,
-.immersive .records,
 .immersive #gp-leaderboard,
 .immersive .topbar h1,
 .immersive .controls .toggle,
