@@ -572,7 +572,7 @@ if (typeof document !== 'undefined') {
             } else {
               r.items.forEach((it, i) => {
                 html += '<li><span class="gp-rank">' + rankBadge(i) + '</span>' +
-                  '<img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.style.background=\'#cfd8dc\'" style="background:#cfd8dc">' +
+                  '<img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.style.background=\'#e0e0e0\'" style="background:#e0e0e0">' +
                   '<span class="gp-lbn">' + esc(it.nickname || '匿名') + '</span>' +
                   '<span class="gp-score">' + fmtScore(it.score) + 's</span></li>';
               });
