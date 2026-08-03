@@ -180,7 +180,6 @@ if (typeof document !== 'undefined') {
   const $board = document.getElementById('board');
   const $mineCount = document.getElementById('mine-count');
   const $timer = document.getElementById('timer');
-  const $recordList = document.getElementById('record-list');
   const $overlay = document.getElementById('share-overlay');
   const $boardWrap = document.querySelector('.board-wrap');
   const $autoFlagToggle = document.getElementById('autoflag-toggle');
@@ -336,7 +335,6 @@ if (typeof document !== 'undefined') {
       window.GamePlatform.submitScore('mine-sweeper', timer, { difficulty: currentDiff, time: timer })
         .catch(() => {});
     }
-    renderRecords();
     showResult(win);
   }
 
@@ -396,24 +394,6 @@ if (typeof document !== 'undefined') {
     onCellLongPress(+t.dataset.i);
     e.stopPropagation();
   });
-
-  async function renderRecords() {
-    $recordList.innerHTML = '';
-    let items = [];
-    try { items = await GamePlatform.getMyScores('mine-sweeper', 10); } catch (e) { items = []; }
-    if (!items.length) { $recordList.innerHTML = '<li>暂无记录</li>'; return; }
-    items.forEach(it => {
-      const m = it.meta || {};
-      const d = new Date(it.created_at);
-      const ts = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      const li = document.createElement('li');
-      const win = m.win;
-      const time = (win ? it.score - ({ easy: 100000, medium: 300000, hard: 600000 }[m.difficulty] || 100000) : m.time) || 0;
-      li.innerHTML = `<span>${DIFF_LABEL[m.difficulty] || m.difficulty} · ${ts}</span>` +
-        `<span class="${win ? 'win' : 'lose'}">${win ? '胜' : '负'} ${time}s</span>`;
-      $recordList.appendChild(li);
-    });
-  }
 
   // 分享按钮：调用 share-card-generator 注入的函数（Task 5 定义）
   document.getElementById('share-btn').addEventListener('click', () => {
@@ -475,7 +455,6 @@ if (typeof document !== 'undefined') {
   GamePlatform.init();
   GamePlatform.mountGate({ gameId: 'mine-sweeper' }).then(() => {
     newGame('easy');
-    renderRecords();
   });
 
   // ===== Task 5: 复用 share-card-generator 生成分享卡（离屏 canvas + 浮层） =====
