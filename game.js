@@ -557,6 +557,8 @@ if (typeof document !== 'undefined') {
     window.generateShareCard = generateShareCard;
 
     // ===== 社交平台接入（game-api SDK）=====
+    // 在线人数与个人用户栏已移除，统一收口到小游戏总入口；
+    // 此处仅保留天梯榜渲染 + 心跳上报（供总入口展示全局在线）。
     (function social() {
       const GP = window.GamePlatform;
       const GAME_ID = 'mine-sweeper';
@@ -565,44 +567,17 @@ if (typeof document !== 'undefined') {
       const esc = s => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
       const fmtScore = s => (typeof s === 'number' && !Number.isNaN(s)) ? (Number.isInteger(s) ? String(s) : s.toFixed(1)) : s;
 
-      function renderUser() {
-        const el = document.getElementById('gp-user'); if (!el) return;
-        if (!GP.getToken()) {
-          el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>';
-          return;
-        }
-        GP.getUser().then(u => {
-          if (!u) { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; return; }
-          el.innerHTML = '<img class="gp-ava" src="' + (u.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-nick">' + esc(u.nickname) + '</span><button class="gp-btn ghost" onclick="gpLogout()">退出</button>';
-        }).catch(() => { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; });
-      }
-      // 登录收口到总入口：未登录跳转 / 退出后点「登录」跳回
-      window.gpGoLogin = () => GP.redirectToLogin();
-      window.gpLogout = () => { GP.logout(); renderUser(); };
-      async function loadOnline() {
-        const box = document.getElementById('gp-online'); if (!box) return;
-        try {
-          const items = await GP.getOnline(GAME_ID);
-          if (!items || !items.length) { box.hidden = true; return; }
-          box.hidden = false;
-          box.innerHTML = '🟢 ' + items.length + ' 人在玩　' + items.slice(0, 8).map(p =>
-            '<img class="gp-oa" src="' + (p.avatar || DEFAULT_AV) + '" title="' + esc(p.nickname || '玩家') + '" onerror="this.src=\'' + DEFAULT_AV + '\'">').join('');
-        } catch (e) {}
-      }
       async function loadLB() {
         const ol = document.getElementById('gp-lb-list'); if (!ol) return;
         try {
           const items = await GP.getLeaderboard(GAME_ID, 10);
           if (!items || !items.length) { ol.innerHTML = '<li class="gp-empty">暂无记录，快来抢榜首！</li>'; return; }
           ol.innerHTML = items.map((it, i) =>
-            '<li><span class="gp-rank">' + (i + 1) + '</span><img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-lbn">' + esc(it.nickname) + '</span><span class="gp-score">' + fmtScore(it.score) + 's</span></li>').join('');
+            '<li><span class="gp-rank">' + (i + 1) + '</span><img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-lbn">' + esc(it.nickname || '匿名') + '</span><span class="gp-score">' + fmtScore(it.score) + 's</span></li>').join('');
         } catch (e) {}
       }
 
-      GP.init();
-      renderUser();
       if (GP.getToken()) GP.startHeartbeat(GAME_ID);
-      loadOnline(); setInterval(loadOnline, 15000);
       loadLB(); setInterval(loadLB, 15000);
     })();
   }
