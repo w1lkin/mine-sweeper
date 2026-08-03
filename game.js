@@ -538,21 +538,47 @@ if (typeof document !== 'undefined') {
     // ===== 社交平台接入（game-api SDK）=====
     // 在线人数与个人用户栏已移除，统一收口到小游戏总入口；
     // 此处仅保留天梯榜渲染 + 心跳上报（供总入口展示全局在线）。
+    // 天梯榜按难度分组（初级/中级/高级），各取榜首。
     (function social() {
       const GP = window.GamePlatform;
       const GAME_ID = 'mine-sweeper';
       if (!GP) return;
-      const DEFAULT_AV = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23cfd8dc'/%3E%3Ccircle cx='40' cy='30' r='15' fill='%23fff'/%3E%3Cpath d='M18 70 a22 22 0 0 1 44 0' fill='%23fff'/%3E%3C/svg%3E";
+      const DEFAULT_AV = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
       const esc = s => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
       const fmtScore = s => (typeof s === 'number' && !Number.isNaN(s)) ? (Number.isInteger(s) ? String(s) : s.toFixed(1)) : s;
+
+      function rankBadge(i) {
+        const medals = ['🥇', '🥈', '🥉'];
+        return i < 3 ? medals[i] : '<span class="gp-rank">' + (i + 1) + '</span>';
+      }
 
       async function loadLB() {
         const ol = document.getElementById('gp-lb-list'); if (!ol) return;
         try {
-          const items = await GP.getLeaderboard(GAME_ID, 10);
-          if (!items || !items.length) { ol.innerHTML = '<li class="gp-empty">暂无记录，快来抢榜首！</li>'; return; }
-          ol.innerHTML = items.map((it, i) =>
-            '<li><span class="gp-rank">' + (i + 1) + '</span><img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-lbn">' + esc(it.nickname || '匿名') + '</span><span class="gp-score">' + fmtScore(it.score) + 's</span></li>').join('');
+          const diffs = [
+            { key: 'easy', label: '初级 9×9' },
+            { key: 'medium', label: '中级 16×16' },
+            { key: 'hard', label: '高级 30×16' },
+          ];
+          const results = await Promise.all(
+            diffs.map(d => GP.getLeaderboard(GAME_ID, 3, d.key).then(items => ({ ...d, items })))
+          );
+          const hasAny = results.some(r => r.items && r.items.length > 0);
+          if (!hasAny) { ol.innerHTML = '<li class="gp-empty">暂无记录，快来抢榜首！</li>'; return; }
+          ol.innerHTML = results.map(r => {
+            let html = '<li class="gp-lb-diff">' + r.label + '</li>';
+            if (!r.items || !r.items.length) {
+              html += '<li class="gp-empty gp-lb-sub">暂无记录</li>';
+            } else {
+              r.items.forEach((it, i) => {
+                html += '<li><span class="gp-rank">' + rankBadge(i) + '</span>' +
+                  '<img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.style.background=\'#cfd8dc\'" style="background:#cfd8dc">' +
+                  '<span class="gp-lbn">' + esc(it.nickname || '匿名') + '</span>' +
+                  '<span class="gp-score">' + fmtScore(it.score) + 's</span></li>';
+              });
+            }
+            return html;
+          }).join('');
         } catch (e) {}
       }
 
