@@ -474,8 +474,6 @@ if (typeof document !== 'undefined') {
   // 硬登录门：未登录不能玩
   GamePlatform.init();
   GamePlatform.mountGate({ gameId: 'mine-sweeper' }).then(() => {
-    GamePlatform.mountBar(document.getElementById('gp-bar'), { gameId: 'mine-sweeper' });
-    GamePlatform.mountLeaderboard(document.getElementById('gp-leaderboard'), { gameId: 'mine-sweeper' });
     newGame('easy');
     renderRecords();
   });
