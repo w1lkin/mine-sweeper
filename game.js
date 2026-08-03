@@ -129,13 +129,14 @@ function loadRecords() {
 
 function saveRecord(record) {
   if (typeof document !== 'undefined' && typeof GamePlatform !== 'undefined') {
-    // 战绩上报：score = 难度权重 + 用时（胜利）；失败仅留痕（+999999）
+    // 战绩上报：仅胜利计入天梯，score = 难度基数 + 用时（asc，越小越好，与 registry 一致）
+    // 失败不入天梯（避免 base+999999 的失败条霸榜），仅作个人历史保留（getMyScores）
+    if (record.result !== 'win') return [];
     const base = { easy: 100000, medium: 300000, hard: 600000 }[record.difficulty] || 100000;
-    const win = record.result === 'win';
-    const score = win ? base + (record.time || 0) : base + 999999;
+    const score = base + (record.time || 0);
     try {
       GamePlatform.submitScore('mine-sweeper', score, {
-        difficulty: record.difficulty, time: record.time, win, cellsLeft: record.cellsLeft,
+        difficulty: record.difficulty, time: record.time, win: true, cellsLeft: record.cellsLeft,
       });
     } catch (e) { console.warn('submit score failed:', e); }
     return [record];
@@ -158,7 +159,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // ===== 浏览器交互与渲染（Task 4 / Task 5） =====
 
-if (typeof document !== 'undefined') {
+if (typeof document !== 'undefined' && typeof document.getElementById === 'function') {
   const DIFFS = {
     easy:   { rows: 9,  cols: 9,  mines: 10 },
     medium: { rows: 16, cols: 16, mines: 40 },
@@ -330,11 +331,6 @@ if (typeof document !== 'undefined') {
       result: win ? 'win' : 'lose',
       time: timer, cellsLeft: left,
     });
-    // 成绩上报：仅胜利计入天梯，score=用时秒（registry: asc，越快越好）
-    if (win && typeof window !== 'undefined' && window.GamePlatform && window.GamePlatform.getToken()) {
-      window.GamePlatform.submitScore('mine-sweeper', timer, { difficulty: currentDiff, time: timer })
-        .catch(() => {});
-    }
     showResult(win);
   }
 
