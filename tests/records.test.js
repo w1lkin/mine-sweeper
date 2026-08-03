@@ -1,17 +1,13 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-// Node 环境无 localStorage，提供 mock
-const store = {};
-global.localStorage = {
-  getItem: k => (k in store ? store[k] : null),
-  setItem: (k, v) => { store[k] = String(v); },
-  removeItem: k => { delete store[k]; },
-};
+// Node 环境下 game.js 用内存数组 _memRecords 保留记录（不再用 localStorage）
+const { loadRecords, saveRecord, _resetRecords } = require('../game.js');
 
-const { loadRecords, saveRecord } = require('../game.js');
+function reset() { _resetRecords(); }
 
 test('saveRecord 写入并倒序保留最近 10 条', () => {
+  reset();
   for (let i = 0; i < 12; i++) {
     saveRecord({
       date: `2026-07-27T10:${String(i).padStart(2, '0')}:00`,
@@ -25,12 +21,12 @@ test('saveRecord 写入并倒序保留最近 10 条', () => {
 });
 
 test('loadRecords 无数据时返回空数组', () => {
-  delete store['minesweeper_records'];
+  reset();
   assert.deepEqual(loadRecords(), []);
 });
 
 test('saveRecord 按时间倒序排列', () => {
-  delete store['minesweeper_records'];
+  reset();
   saveRecord({ date: '2026-07-27T10:00:00', difficulty: 'easy', result: 'lose', time: 5, cellsLeft: 3 });
   saveRecord({ date: '2026-07-27T12:00:00', difficulty: 'medium', result: 'win', time: 9, cellsLeft: 0 });
   const recs = loadRecords();
