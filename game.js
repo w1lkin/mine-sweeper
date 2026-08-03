@@ -570,7 +570,7 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
               html += '<li class="gp-empty gp-lb-sub">暂无记录</li>';
             } else {
               r.items.forEach((it, i) => {
-                const time = typeof it.score === 'number' ? it.score - r.base : it.score;
+                const time = (Number(it.score) || 0) - r.base;
                 html += '<li><span class="gp-rank">' + rankBadge(i) + '</span>' +
                   '<img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.style.background=\'#e0e0e0\'" style="background:#e0e0e0">' +
                   '<span class="gp-lbn">' + esc(it.nickname || '匿名') + '</span>' +
