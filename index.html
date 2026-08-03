@@ -4,15 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>扫雷</title>
-  <meta name="description" content="经典扫雷，三档难度、最近战绩本地保存，支持分享卡片。">
+  <meta name="api-base" content="https://api.w1lkin.site">
+  <script src="https://api.w1lkin.site/sdk.js"></script>
+  <meta name="description" content="经典扫雷，三档难度、最近战绩云端保存，支持分享卡片。">
   <meta property="og:title" content="扫雷">
   <meta property="og:description" content="经典扫雷，三档难度，挑战你的最快通关纪录！">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://mine-sweeper-2f1.pages.dev/">
-  <meta property="og:image" content="https://mine-sweeper-2f1.pages.dev/share-card.png">
+  <meta property="og:url" content="https://mine-sweeper.w1lkin.site/">
+  <meta property="og:image" content="https://mine-sweeper.w1lkin.site/share-card.png">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 社交平台接入样式 */
+    .gp-user { display: flex; align-items: center; gap: 8px; }
+    .gp-btn { border: none; border-radius: 18px; padding: 7px 14px; font-size: 13px; font-weight: 600; background: #81C784; color: #fff; cursor: pointer; }
+    .gp-btn.ghost { background: transparent; color: #81C784; border: 1.5px solid #81C784; }
+    .gp-ava { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: #cfd8dc; }
+    .gp-nick { font-size: 13px; max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gp-online { display: flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 13px; color: #2e7d32; flex-wrap: wrap; }
+    .gp-online[hidden] { display: none; }
+    .gp-oa { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+    .gp-lb { margin: 14px; background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
+    .gp-lb h2 { font-size: 15px; margin: 0 0 10px; }
+    .gp-lb ol { list-style: none; margin: 0; padding: 0; }
+    .gp-lb li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .gp-lb li:last-child { border-bottom: none; }
+    .gp-rank { width: 22px; height: 22px; border-radius: 50%; background: #81C784; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; }
+    .gp-lbn { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gp-score { color: #2e7d32; font-weight: 600; }
+    .gp-empty { color: #8a9790; font-size: 13px; padding: 8px 0; }
+    .gp-modal { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; }
+    .gp-modal.hidden { display: none; }
+    .gp-sheet { background: #fff; width: 100%; max-width: 460px; border-radius: 20px 20px 0 0; padding: 20px 18px; animation: gpUp .2s ease; }
+    @keyframes gpUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .gp-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .gp-tab { flex: 1; padding: 10px; border: none; border-radius: 12px; background: #f3f6f4; font-size: 15px; font-weight: 600; color: #8a9790; cursor: pointer; }
+    .gp-tab.active { background: #81C784; color: #fff; }
+    .gp-sheet input[type=text], .gp-sheet input[type=password] { width: 100%; padding: 13px 14px; margin-bottom: 12px; border: 1.5px solid #eef1ee; border-radius: 12px; font-size: 15px; outline: none; }
+    .gp-file { display: block; font-size: 13px; color: #8a9790; margin-bottom: 12px; }
+    .gp-file input { margin-top: 6px; font-size: 13px; }
+    .gp-msg { color: #e53935; font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+    .gp-sheet .gp-btn { width: 100%; margin-top: 4px; padding: 13px; }
+  </style>
 </head>
 <body>
+  <div id="gp-bar" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:6px 12px;background:rgba(20,24,40,.85)"></div>
+  <div id="gp-leaderboard" style="position:fixed;right:8px;bottom:8px;z-index:50;max-width:200px;padding:10px;background:rgba(20,24,40,.9);border-radius:12px"></div>
   <main class="app">
     <header class="topbar">
       <h1>扫雷</h1>
@@ -20,8 +56,11 @@
         <span id="mine-count">💣 0</span>
         <span id="timer">⏱ 0</span>
       </div>
+      <div id="gp-user" class="gp-user"></div>
     </header>
     <button id="immerse-exit" class="immerse-exit" type="button" title="退出沉浸" aria-label="退出沉浸">✕</button>
+
+    <div id="gp-online" class="gp-online" hidden></div>
 
     <section class="difficulty">
       <button data-diff="easy" class="active">初级 9×9</button>
@@ -66,6 +105,11 @@
       <ul id="record-list"></ul>
     </section>
 
+    <section id="gp-leaderboard" class="gp-lb">
+      <h2>🏆 天梯榜（最快通关）</h2>
+      <ol id="gp-lb-list"></ol>
+    </section>
+
     <div id="result-overlay" class="result-overlay">
       <div class="result-card">
         <div class="result-emoji" id="result-emoji">🎉</div>
@@ -84,6 +128,28 @@
       <button id="share-close" class="share-close">关闭</button>
     </div>
   </main>
-  <script src="game.js"></script>
+
+  <!-- 动态加载 SDK（?api= 可覆盖本地联调），加载完成再加载 game.js -->
+  <script>
+    window.__GP_API_BASE__ = new URLSearchParams(location.search).get('api') || 'https://api.w1lkin.site';
+    (function () {
+      var s = document.createElement('script');
+      s.src = window.__GP_API_BASE__ + '/sdk.js';
+      function loadGame() {
+        var g = document.createElement('script');
+        g.src = 'game.js';
+        document.body.appendChild(g);
+      }
+      s.onload = function () {
+        var GP = window.GamePlatform;
+        GP.init();
+        // 未登录统一跳转到总入口登录（带 redirect 回来带 token）
+        if (!GP.getToken()) { GP.redirectToLogin(); return; }
+        loadGame();
+      };
+      s.onerror = loadGame; // SDK 不可用时游戏仍可玩（无社交功能）
+      document.head.appendChild(s);
+    })();
+  </script>
 </body>
 </html>

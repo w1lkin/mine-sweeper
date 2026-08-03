@@ -112,31 +112,39 @@ function isWin(board) {
   return board.cells.every(c => c.mine || c.revealed);
 }
 
-// ===== 最近 10 次记录（localStorage） =====
+// ===== 最近 10 次记录（云端 getMyScores / submitScore）=====
 
 const RECORDS_KEY = 'minesweeper_records';
 const MAX_RECORDS = 10;
 
+// 浏览器环境：战绩上报云端；Node 环境（测试）：保留内存版本以验证排序/截断逻辑
+const _memRecords = [];
+
 function loadRecords() {
-  try {
-    const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(RECORDS_KEY) : null;
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) {
-    return [];
+  if (typeof document === 'undefined') {
+    return _memRecords.slice();
   }
+  return []; // 浏览器历史改由 GamePlatform.getMyScores 异步渲染
 }
 
 function saveRecord(record) {
-  const recs = loadRecords();
-  recs.push(record);
-  recs.sort((a, b) => new Date(b.date) - new Date(a.date));
-  const trimmed = recs.slice(0, MAX_RECORDS);
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(RECORDS_KEY, JSON.stringify(trimmed));
+  if (typeof document !== 'undefined' && typeof GamePlatform !== 'undefined') {
+    // 战绩上报：score = 难度权重 + 用时（胜利）；失败仅留痕（+999999）
+    const base = { easy: 100000, medium: 300000, hard: 600000 }[record.difficulty] || 100000;
+    const win = record.result === 'win';
+    const score = win ? base + (record.time || 0) : base + 999999;
+    try {
+      GamePlatform.submitScore('mine-sweeper', score, {
+        difficulty: record.difficulty, time: record.time, win, cellsLeft: record.cellsLeft,
+      });
+    } catch (e) { console.warn('submit score failed:', e); }
+    return [record];
   }
-  return trimmed;
+  // Node 测试路径：保留排序/截断逻辑
+  _memRecords.push(record);
+  _memRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (_memRecords.length > MAX_RECORDS) _memRecords.length = MAX_RECORDS;
+  return _memRecords.slice();
 }
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -144,6 +152,7 @@ if (typeof module !== 'undefined' && module.exports) {
     initBoard, placeMines, forEachNeighbor, idx,
     reveal, toggleFlag, remainingMines, isWin, autoFlag,
     loadRecords, saveRecord, MAX_RECORDS, RECORDS_KEY,
+    _resetRecords: () => { _memRecords.length = 0; },
   };
 }
 
@@ -160,7 +169,12 @@ if (typeof document !== 'undefined') {
   let board = null;
   let currentDiff = 'easy';
   let timer = 0, timerId = null, started = false, finished = false, lastWin = null;
-  let autoFlagOn = (localStorage.getItem('minesweeper_autoflag') !== 'false'); // 默认开
+  let autoFlagOn = true; // 默认开；登录后从云端 KV 恢复
+  if (typeof GamePlatform !== 'undefined') {
+    GamePlatform.getKV('minesweeper_autoflag').then((v) => {
+      if (v === false || v === 'false') { autoFlagOn = false; if ($autoFlagToggle) $autoFlagToggle.checked = false; }
+    }).catch(() => {});
+  }
   let paused = false;
 
   const $board = document.getElementById('board');
@@ -317,6 +331,11 @@ if (typeof document !== 'undefined') {
       result: win ? 'win' : 'lose',
       time: timer, cellsLeft: left,
     });
+    // 成绩上报：仅胜利计入天梯，score=用时秒（registry: asc，越快越好）
+    if (win && typeof window !== 'undefined' && window.GamePlatform && window.GamePlatform.getToken()) {
+      window.GamePlatform.submitScore('mine-sweeper', timer, { difficulty: currentDiff, time: timer })
+        .catch(() => {});
+    }
     renderRecords();
     showResult(win);
   }
@@ -378,16 +397,20 @@ if (typeof document !== 'undefined') {
     e.stopPropagation();
   });
 
-  function renderRecords() {
-    const recs = loadRecords();
+  async function renderRecords() {
     $recordList.innerHTML = '';
-    if (!recs.length) { $recordList.innerHTML = '<li>暂无记录</li>'; return; }
-    recs.forEach(r => {
-      const li = document.createElement('li');
-      const d = new Date(r.date);
+    let items = [];
+    try { items = await GamePlatform.getMyScores('mine-sweeper', 10); } catch (e) { items = []; }
+    if (!items.length) { $recordList.innerHTML = '<li>暂无记录</li>'; return; }
+    items.forEach(it => {
+      const m = it.meta || {};
+      const d = new Date(it.created_at);
       const ts = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-      li.innerHTML = `<span>${DIFF_LABEL[r.difficulty]} · ${ts}</span>` +
-        `<span class="${r.result}">${r.result === 'win' ? '胜' : '负'} ${r.time}s</span>`;
+      const li = document.createElement('li');
+      const win = m.win;
+      const time = (win ? it.score - ({ easy: 100000, medium: 300000, hard: 600000 }[m.difficulty] || 100000) : m.time) || 0;
+      li.innerHTML = `<span>${DIFF_LABEL[m.difficulty] || m.difficulty} · ${ts}</span>` +
+        `<span class="${win ? 'win' : 'lose'}">${win ? '胜' : '负'} ${time}s</span>`;
       $recordList.appendChild(li);
     });
   }
@@ -433,21 +456,29 @@ if (typeof document !== 'undefined') {
   $autoFlagToggle.checked = autoFlagOn;
   $autoFlagToggle.addEventListener('change', () => {
     autoFlagOn = $autoFlagToggle.checked;
-    try { localStorage.setItem('minesweeper_autoflag', autoFlagOn ? '1' : 'false'); } catch (e) {}
+    try { GamePlatform.setKV('minesweeper_autoflag', autoFlagOn); } catch (e) {}
     if (autoFlagOn && board) { autoFlag(board); render(); }
   });
 
   function setImmerse(on) {
     document.body.classList.toggle('immersive', on);
     $immerseBtn.textContent = on ? '退出' : '🙈 沉浸';
-    try { localStorage.setItem('minesweeper_immersive', on ? '1' : '0'); } catch (e) {}
+    try { GamePlatform.setKV('minesweeper_immersive', on); } catch (e) {}
   }
   $immerseBtn.addEventListener('click', () => setImmerse(!document.body.classList.contains('immersive')));
   $immerseExit.addEventListener('click', () => setImmerse(false));
-  if (localStorage.getItem('minesweeper_immersive') === '1') setImmerse(true);
+  if (typeof GamePlatform !== 'undefined') {
+    GamePlatform.getKV('minesweeper_immersive').then((v) => { if (v === true || v === '1') setImmerse(true); }).catch(() => {});
+  }
 
-  newGame('easy');
-  renderRecords();
+  // 硬登录门：未登录不能玩
+  GamePlatform.init();
+  GamePlatform.mountGate({ gameId: 'mine-sweeper' }).then(() => {
+    GamePlatform.mountBar(document.getElementById('gp-bar'), { gameId: 'mine-sweeper' });
+    GamePlatform.mountLeaderboard(document.getElementById('gp-leaderboard'), { gameId: 'mine-sweeper' });
+    newGame('easy');
+    renderRecords();
+  });
 
   // ===== Task 5: 复用 share-card-generator 生成分享卡（离屏 canvas + 浮层） =====
   // 根据难度与用时长短生成夸赞评语
@@ -525,5 +556,55 @@ if (typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
     }
   }
-  window.generateShareCard = generateShareCard;
-}
+    window.generateShareCard = generateShareCard;
+
+    // ===== 社交平台接入（game-api SDK）=====
+    (function social() {
+      const GP = window.GamePlatform;
+      const GAME_ID = 'mine-sweeper';
+      if (!GP) return;
+      const DEFAULT_AV = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23cfd8dc'/%3E%3Ccircle cx='40' cy='30' r='15' fill='%23fff'/%3E%3Cpath d='M18 70 a22 22 0 0 1 44 0' fill='%23fff'/%3E%3C/svg%3E";
+      const esc = s => String(s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+      const fmtScore = s => (typeof s === 'number' && !Number.isNaN(s)) ? (Number.isInteger(s) ? String(s) : s.toFixed(1)) : s;
+
+      function renderUser() {
+        const el = document.getElementById('gp-user'); if (!el) return;
+        if (!GP.getToken()) {
+          el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>';
+          return;
+        }
+        GP.getUser().then(u => {
+          if (!u) { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; return; }
+          el.innerHTML = '<img class="gp-ava" src="' + (u.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-nick">' + esc(u.nickname) + '</span><button class="gp-btn ghost" onclick="gpLogout()">退出</button>';
+        }).catch(() => { el.innerHTML = '<button class="gp-btn" onclick="gpGoLogin()">登录</button>'; });
+      }
+      // 登录收口到总入口：未登录跳转 / 退出后点「登录」跳回
+      window.gpGoLogin = () => GP.redirectToLogin();
+      window.gpLogout = () => { GP.logout(); renderUser(); };
+      async function loadOnline() {
+        const box = document.getElementById('gp-online'); if (!box) return;
+        try {
+          const items = await GP.getOnline(GAME_ID);
+          if (!items || !items.length) { box.hidden = true; return; }
+          box.hidden = false;
+          box.innerHTML = '🟢 ' + items.length + ' 人在玩　' + items.slice(0, 8).map(p =>
+            '<img class="gp-oa" src="' + (p.avatar || DEFAULT_AV) + '" title="' + esc(p.nickname || '玩家') + '" onerror="this.src=\'' + DEFAULT_AV + '\'">').join('');
+        } catch (e) {}
+      }
+      async function loadLB() {
+        const ol = document.getElementById('gp-lb-list'); if (!ol) return;
+        try {
+          const items = await GP.getLeaderboard(GAME_ID, 10);
+          if (!items || !items.length) { ol.innerHTML = '<li class="gp-empty">暂无记录，快来抢榜首！</li>'; return; }
+          ol.innerHTML = items.map((it, i) =>
+            '<li><span class="gp-rank">' + (i + 1) + '</span><img class="gp-oa" src="' + (it.avatar_url || DEFAULT_AV) + '" onerror="this.src=\'' + DEFAULT_AV + '\'"><span class="gp-lbn">' + esc(it.nickname) + '</span><span class="gp-score">' + fmtScore(it.score) + 's</span></li>').join('');
+        } catch (e) {}
+      }
+
+      GP.init();
+      renderUser();
+      if (GP.getToken()) GP.startHeartbeat(GAME_ID);
+      loadOnline(); setInterval(loadOnline, 15000);
+      loadLB(); setInterval(loadLB, 15000);
+    })();
+  }
