@@ -425,7 +425,7 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
       return;
     }
     if (onBoard) return;                 // 正常棋盘点击由 board 处理器处理
-    if (e.target.closest('button, .toggle, .share-overlay')) return; // 控件放行，不暂停
+    if (e.target.closest('button, .toggle, .share-overlay, .gp-tabbar, a')) return; // 控件/链接放行，不暂停
     pauseGame();                         // 点空白区 => 暂停
   });
 
