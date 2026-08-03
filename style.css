@@ -86,6 +86,7 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .immersive .difficulty,
 .immersive .actions,
 .immersive .records,
+.immersive #gp-leaderboard,
 .immersive .topbar h1,
 .immersive .controls .toggle,
 .immersive #pause-btn, .immersive .controls { display: none; }
