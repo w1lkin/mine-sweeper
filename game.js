@@ -423,23 +423,36 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
   });
   $board.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
   $board.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
+
+  // 双击检测：记录上次 click 的时间和 cell 索引，300ms 内同一 cell 两次 click 视为双击
+  let lastClickTime = 0, lastClickIdx = -1;
   $board.addEventListener('click', e => {
-    const t = e.target.closest('.cell'); if (!t) return;
-    if (longPressed) { longPressed = false; return; }
-    onCellClick(+t.dataset.i);
+    const t = e.target.closest('.cell'); if (!t) { lastClickIdx = -1; return; }
+    if (longPressed) { longPressed = false; lastClickIdx = -1; return; }
+    const idx = +t.dataset.i;
+    const now = Date.now();
+
+    // 检测双击：同一格子 300ms 内连点两次
+    if (idx === lastClickIdx && (now - lastClickTime) < 300) {
+      // 双击已翻开的数字格 → chordReveal 自动散开
+      const cell = board && board.cells[idx];
+      if (cell && cell.revealed && !cell.mine && cell.adj > 0) {
+        onCellDoubleClick(idx);
+        lastClickIdx = -1;
+        e.stopPropagation();
+        return;
+      }
+    }
+
+    lastClickTime = now;
+    lastClickIdx = idx;
+    onCellClick(idx);
     e.stopPropagation(); // render() 会重建 DOM，阻断冒泡避免误触 document 暂停逻辑
   });
   $board.addEventListener('contextmenu', e => {
     e.preventDefault();
     const t = e.target.closest('.cell'); if (!t) return;
     onCellLongPress(+t.dataset.i);
-    e.stopPropagation();
-  });
-  // 双击已翻开的数字格 → 自动散开未翻邻格（chording）。
-  // 注意：dblclick 紧跟两次 click，本处理器通过提前返回消除重复触发。
-  $board.addEventListener('dblclick', e => {
-    const t = e.target.closest('.cell'); if (!t) return;
-    onCellDoubleClick(+t.dataset.i);
     e.stopPropagation();
   });
 
