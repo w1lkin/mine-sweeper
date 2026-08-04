@@ -615,7 +615,7 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
 
     // ===== 社交平台接入（game-api SDK）=====
     // 在线人数与个人用户栏已移除，统一收口到小游戏总入口；
-    // 此处仅保留天梯榜渲染 + 心跳上报（供总入口展示全局在线）。
+    // 此处仅保留天梯榜渲染。
     // 天梯榜按难度分组（初级/中级/高级），各取榜首。
     (function social() {
       const GP = window.GamePlatform;
@@ -664,7 +664,6 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
         } catch (e) {}
       }
 
-      if (GP.getToken()) GP.startHeartbeat(GAME_ID);
       loadLB(); setInterval(loadLB, 15000);
     })();
   }
