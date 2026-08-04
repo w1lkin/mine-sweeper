@@ -17,6 +17,8 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
   justify-content: center; background: #ffffff; border-radius: 0; font-weight: 700;
   font-size: 14px; user-select: none; cursor: pointer; box-shadow: none; }
 .cell.revealed { background: #e7e6e6; cursor: default; box-shadow: none; }
+/* 已翻开的数字格支持双击自动散开（chording） */
+.cell.revealed[class^="n"], .cell.revealed[class*=" n"] { cursor: pointer; }
 .cell.flagged::after { content: "🚩"; }
 .cell.mine { background: #ef9a9a; }
 .cell.n1 { color: #1976d2; } .cell.n2 { color: #388e3c; } .cell.n3 { color: #d32f2f; }

@@ -108,6 +108,37 @@ function remainingMines(board) {
   return board.mineCount - flags;
 }
 
+// chord：双击（或同时按左右键）已翻开的数字格 → 若邻域旗数 === adj，
+// 自动点开所有邻域中「未翻未标」的格子。这是经典的"自动散开"/chording 行为。
+// 触发条件必须同时满足：
+//   1. 中心格已 revealed 且 adj > 0（非空格、非雷）
+//   2. 周围 flagged 数 === adj
+//   3. 周围还有未打开且未标的格子
+function chordReveal(board, r, c) {
+  const center = board.cells[idx(board, r, c)];
+  if (!center.revealed || center.mine || center.adj <= 0) {
+    return { hitMine: false, revealedCount: 0, triggered: false };
+  }
+  let flagged = 0;
+  const hidden = [];
+  forEachNeighbor(board, r, c, (nr, nc) => {
+    const n = board.cells[idx(board, nr, nc)];
+    if (n.flagged) flagged++;
+    else if (!n.revealed) hidden.push([nr, nc]);
+  });
+  if (flagged !== center.adj || hidden.length === 0) {
+    return { hitMine: false, revealedCount: 0, triggered: false };
+  }
+  // 满足条件：按顺序点开所有 hidden；任一踩雷立刻终止并上抛
+  let revealedCount = 0;
+  for (const [hr, hc] of hidden) {
+    const res = reveal(board, hr, hc);
+    if (res.hitMine) return { hitMine: true, revealedCount, triggered: true };
+    revealedCount += res.revealedCount;
+  }
+  return { hitMine: false, revealedCount, triggered: true };
+}
+
 function isWin(board) {
   return board.cells.every(c => c.mine || c.revealed);
 }
@@ -151,7 +182,7 @@ function saveRecord(record) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     initBoard, placeMines, forEachNeighbor, idx,
-    reveal, toggleFlag, remainingMines, isWin, autoFlag,
+    reveal, toggleFlag, remainingMines, isWin, autoFlag, chordReveal,
     loadRecords, saveRecord, MAX_RECORDS, RECORDS_KEY,
     _resetRecords: () => { _memRecords.length = 0; },
   };
@@ -368,6 +399,20 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
     render();
   }
 
+  // 双击已翻开的数字格 → 满足条件时自动散开未翻邻格。
+  // 设计参考：经典扫雷"chording"，鼠标是 dblclick；触屏由用户自定义手势触发（此处仅接 dblclick）。
+  function onCellDoubleClick(i) {
+    if (finished || paused) return;
+    const r = Math.floor(i / board.cols), c = i % board.cols;
+    startTimer();
+    const res = chordReveal(board, r, c);
+    if (!res.triggered) return; // 条件不满足，零反馈避免误触惩罚
+    if (res.hitMine) { render(); endGame(false); return; }
+    if (autoFlagOn) autoFlag(board);
+    render();
+    if (isWin(board)) endGame(true);
+  }
+
   // 触摸长按检测
   let pressTimer = null, longPressed = false;
   $board.addEventListener('touchstart', e => {
@@ -388,6 +433,13 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
     e.preventDefault();
     const t = e.target.closest('.cell'); if (!t) return;
     onCellLongPress(+t.dataset.i);
+    e.stopPropagation();
+  });
+  // 双击已翻开的数字格 → 自动散开未翻邻格（chording）。
+  // 注意：dblclick 紧跟两次 click，本处理器通过提前返回消除重复触发。
+  $board.addEventListener('dblclick', e => {
+    const t = e.target.closest('.cell'); if (!t) return;
+    onCellDoubleClick(+t.dataset.i);
     e.stopPropagation();
   });
 
