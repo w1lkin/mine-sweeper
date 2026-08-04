@@ -452,7 +452,15 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
   $board.addEventListener('contextmenu', e => {
     e.preventDefault();
     const t = e.target.closest('.cell'); if (!t) return;
-    onCellLongPress(+t.dataset.i);
+    const i = +t.dataset.i;
+    const cell = board && board.cells[i];
+    // 右键已翻开的数字格 → chord 散开（和双击效果一样，摸鱼更隐蔽）
+    if (cell && cell.revealed && !cell.mine && cell.adj > 0) {
+      onCellDoubleClick(i);
+    } else {
+      // 右键未翻开的格子 → 插旗/取消插旗
+      onCellLongPress(i);
+    }
     e.stopPropagation();
   });
 
