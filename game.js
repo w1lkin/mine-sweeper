@@ -454,9 +454,18 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
     const t = e.target.closest('.cell'); if (!t) return;
     const i = +t.dataset.i;
     const cell = board && board.cells[i];
+    if (!cell || finished || paused) return;
     // 右键已翻开的数字格 → chord 散开（和双击效果一样，摸鱼更隐蔽）
-    if (cell && cell.revealed && !cell.mine && cell.adj > 0) {
-      onCellDoubleClick(i);
+    if (cell.revealed && !cell.mine && cell.adj > 0) {
+      const r = Math.floor(i / board.cols), c = i % board.cols;
+      startTimer();
+      const res = chordReveal(board, r, c);
+      if (res.hitMine) { render(); endGame(false); return; }
+      if (res.triggered) {
+        if (autoFlagOn) autoFlag(board);
+        render();
+        if (isWin(board)) endGame(true);
+      }
     } else {
       // 右键未翻开的格子 → 插旗/取消插旗
       onCellLongPress(i);
