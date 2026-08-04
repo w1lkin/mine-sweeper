@@ -118,8 +118,6 @@
       s.onload = function () {
         var GP = window.GamePlatform;
         GP.init();
-        // 未登录统一跳转到总入口登录（带 redirect 回来带 token）
-        if (!GP.getToken()) { GP.redirectToLogin(); return; }
         loadGame();
       };
       s.onerror = loadGame; // SDK 不可用时游戏仍可玩（无社交功能）
