@@ -82,7 +82,6 @@ body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", 
 .bsb-thumb:active { cursor: grabbing; background: #909090; }
 .immersive .difficulty,
 .immersive .actions,
-.immersive #gp-leaderboard,
 .immersive .gp-home-btn,
 .immersive .topbar h1,
 .immersive .controls .toggle,
