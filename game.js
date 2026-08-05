@@ -488,17 +488,16 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
 
   // 触摸长按检测：手机端长按插旗/拔旗
   // 每次手指按下+长按触发一次插旗/拔旗，松手后再次按下+长按为第二次独立操作
-  // 防止单次触摸意外触发多次 toggle（如 touchstart 重复触发、click 补偿等）
-  let pressTimer = null, longPressed = false, flagDoneThisTouch = false;
+  // 移动端长按会同时触发 touchstart timer 和浏览器 contextmenu 事件，
+  // 用 longPressed 标记防止同一轮触摸 toggle 两次（插了又拔）。
+  let pressTimer = null, longPressed = false;
   $board.addEventListener('touchstart', e => {
     const t = e.target.closest('.cell'); if (!t) return;
-    // 同一轮触摸已经执行过一次插旗/拔旗，不再重复触发
-    if (flagDoneThisTouch) return;
     longPressed = false;
     const i = +t.dataset.i;
+    if (pressTimer) clearTimeout(pressTimer);
     pressTimer = setTimeout(() => {
       longPressed = true;
-      flagDoneThisTouch = true; // 本轮触摸已执行，松手前不再触发
       if (!board || finished || paused) return;
       const cell = board.cells[i];
       if (cell.revealed) return;
@@ -508,10 +507,7 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
       saveGame();
     }, 400);
   });
-  $board.addEventListener('touchend', () => {
-    if (pressTimer) clearTimeout(pressTimer);
-    flagDoneThisTouch = false; // 松手后重置，允许下一轮触摸再次触发
-  });
+  $board.addEventListener('touchend', () => { if (pressTimer) clearTimeout(pressTimer); });
   $board.addEventListener('touchmove', () => { if (pressTimer) clearTimeout(pressTimer); });
 
   // 双击检测：记录上次 click 的时间和 cell 索引，300ms 内同一 cell 两次 click 视为双击
@@ -557,8 +553,12 @@ if (typeof document !== 'undefined' && typeof document.getElementById === 'funct
         if (isWin(board)) endGame(true);
       }
     } else {
-      // 右键未翻开的格子 → 插旗/取消插旗
-      onCellLongPress(i);
+      // 右键/移动端长按未翻开的格子 → 插旗/取消插旗
+      // 若 touchstart timer 已处理过（longPressed），则跳过避免 toggle 两次
+      if (!longPressed) {
+        onCellLongPress(i);
+      }
+      longPressed = false;
     }
     e.stopPropagation();
   });
