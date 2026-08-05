@@ -14,20 +14,8 @@
   <meta property="og:image" content="https://mine-sweeper-2f1.pages.dev/share-card.png">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 社交平台接入样式 */
+    /* 社交平台接入样式（天梯榜已统一收口到总入口，此处仅保留头像样式） */
     .gp-oa { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); object-fit: cover; background: #e0e0e0; }
-    .gp-lb { margin: 14px; background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
-    .gp-lb h2 { font-size: 15px; margin: 0 0 10px; }
-    .gp-lb ol { list-style: none; margin: 0; padding: 0; }
-    .gp-lb li { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-    .gp-lb li:last-child { border-bottom: none; }
-    .gp-rank { width: 22px; height: 22px; border-radius: 50%; background: #81C784; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; }
-    .gp-lbn { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .gp-score { color: #2e7d32; font-weight: 600; }
-    .gp-empty { color: #8a9790; font-size: 13px; padding: 8px 0; }
-    .gp-lb-diff { font-size: 12px; font-weight: 700; color: #4472c4; padding: 10px 0 4px; border-bottom: none; }
-    .gp-lb-diff:first-child { padding-top: 2px; }
-    .gp-lb-sub { padding-left: 30px; }
   </style>
 </head>
 <body>
@@ -79,11 +67,6 @@
       <button id="restart">🔄 重开</button>
       <button id="share-btn">📤 分享</button>
     </div>
-
-    <section id="gp-leaderboard" class="gp-lb">
-      <h2>🏆 天梯榜（最快通关）</h2>
-      <ol id="gp-lb-list"></ol>
-    </section>
 
     <div id="result-overlay" class="result-overlay">
       <div class="result-card">
