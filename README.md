@@ -39,7 +39,3 @@ node --test tests/game.test.js tests/records.test.js
 
 已部署示例：`mine-sweeper-2f1.pages.dev`（Cloudflare Pages）。
 
-## 版本
-
-- **v1.0.0** — 初始发布：经典扫雷、三档难度、自动化测试、云端战绩
-- **v2.0.0** — 完善项目文档（AGENTS.md / README.md）
