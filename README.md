@@ -41,4 +41,5 @@ node --test tests/game.test.js tests/records.test.js
 
 ## 版本
 
-当前分支：`release/1.0.0`
+- **v1.0.0** — 初始发布：经典扫雷、三档难度、自动化测试、云端战绩
+- **v2.0.0** — 完善项目文档（AGENTS.md / README.md）
