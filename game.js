@@ -145,7 +145,6 @@ function isWin(board) {
 
 // ===== 最近 10 次记录（云端 getMyScores / submitScore）=====
 
-const RECORDS_KEY = 'minesweeper_records';
 const MAX_RECORDS = 10;
 
 // 浏览器环境：战绩上报云端；Node 环境（测试）：保留内存版本以验证排序/截断逻辑
@@ -183,7 +182,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     initBoard, placeMines, forEachNeighbor, idx,
     reveal, toggleFlag, remainingMines, isWin, autoFlag, chordReveal,
-    loadRecords, saveRecord, MAX_RECORDS, RECORDS_KEY,
+    loadRecords, saveRecord, MAX_RECORDS,
     _resetRecords: () => { _memRecords.length = 0; },
   };
 }
